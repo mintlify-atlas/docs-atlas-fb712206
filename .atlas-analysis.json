@@ -1,0 +1,138 @@
+{
+  "projectType": "frontend",
+  "projectName": "ta93abe Portfolio",
+  "projectDescription": "Personal portfolio and blog site for software engineer ta93abe, built with Astro and TypeScript.",
+  "theme": "palm",
+  "primaryColor": "#2563eb",
+  "lightColor": "#60a5fa",
+  "darkColor": "#1e40af",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/content-collections",
+              "features/blog-system",
+              "features/portfolio-works",
+              "features/bookshelf",
+              "features/external-content"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/project-structure",
+              "development/components",
+              "development/styling",
+              "development/testing"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "deployment/cloudflare-pages",
+              "deployment/environment-variables"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Components",
+        "groups": [
+          {
+            "group": "UI Components",
+            "pages": [
+              "components/button",
+              "components/card",
+              "components/badge",
+              "components/input"
+            ]
+          },
+          {
+            "group": "Layout Components",
+            "pages": [
+              "components/header",
+              "components/footer",
+              "components/hero-section"
+            ]
+          },
+          {
+            "group": "Blog Components",
+            "pages": [
+              "components/callout",
+              "components/link-card",
+              "components/share-buttons"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Content Management",
+            "pages": [
+              "guides/adding-blog-posts",
+              "guides/adding-works",
+              "guides/managing-books",
+              "guides/rss-feeds"
+            ]
+          },
+          {
+            "group": "Customization",
+            "pages": [
+              "guides/site-configuration",
+              "guides/theming",
+              "guides/seo-optimization"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "guides/og-image-generation",
+              "guides/reading-time-calculation",
+              "guides/ens-integration"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Astro-based static site with optimized performance",
+    "Content collections for blog, portfolio works, books, and talks",
+    "MDX support for rich content authoring",
+    "RSS feed aggregation from external platforms (Zenn, Note, Podcast)",
+    "Automatic OG image generation with Satori",
+    "Reading time calculation for blog posts",
+    "Full-text search with Pagefind integration",
+    "Responsive UI components built with Tailwind CSS",
+    "SEO optimized with sitemap and RSS feed generation",
+    "ENS (Ethereum Name Service) integration",
+    "Cloudflare Pages deployment with Wrangler",
+    "Comprehensive testing with Vitest and Playwright"
+  ],
+  "publicApiSurface": [
+    "Content Collections: blog, works, books, talks, zenn, note, podcast",
+    "Layout Components: Layout, Header, Footer",
+    "UI Components: Button, Card, Badge, Input, Tag",
+    "Blog Components: Callout, LinkCard, OgpCard, ShareButtons",
+    "Utility Functions: formatDate, calculateReadingTime, getENSData",
+    "RSS Loader: createRSSLoader",
+    "OGP Generator: generateOgImage",
+    "Pages: /, /blog, /works, /bookshelf, /slides, /links, /tools",
+    "RSS Feed: /rss.xml",
+    "Sitemap: /sitemap.xml"
+  ]
+}
