@@ -1,0 +1,184 @@
+---
+title: "OG Image Generation"
+description: "Dynamic Open Graph image generation using Satori and Resvg"
+---
+
+The portfolio uses **Satori** to dynamically generate Open Graph images for blog posts and other content. This ensures that when links are shared on social media platforms, they display beautiful, branded preview images.
+
+## How It Works
+
+The OG image generation system consists of two main components:
+
+1. **Image Generator Utility** (`src/utils/og/generate-og-image.ts:38-222`)
+2. **API Endpoint** (`src/pages/og/blog/[id].png.ts:5-27`)
+
+### The Generation Process
+
+1. **Satori** converts React-like JSX elements into SVG
+2. **Resvg** converts the SVG into a PNG image
+3. The image is served as a static asset with cache headers
+
+## Implementation Details
+
+### Image Dimensions
+
+The standard Open Graph image size is used:
+
+```typescript
+const OG_WIDTH = 1200;
+const OG_HEIGHT = 630;
+```
+
+### Font Loading
+
+To support Japanese text, Noto Sans JP is loaded from a CDN and cached:
+
+```typescript
+async function loadFont(): Promise<ArrayBuffer> {
+  if (fontData) {
+    return fontData;
+  }
+
+  const fontUrl =
+    "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@5.0.0/files/noto-sans-jp-japanese-700-normal.woff";
+
+  const fontDataResponse = await fetch(fontUrl);
+  fontData = await fontDataResponse.arrayBuffer();
+  return fontData;
+}
+```
+
+### Color Schemes
+
+The generator supports three content types, each with its own color scheme (`src/utils/og/generate-og-image.ts:46-62`):
+
+- **Blog**: Blue gradient background (`#1e3a5f` → `#0f172a`)
+- **Works**: Purple gradient background (`#4c1d95` → `#1e1b4b`)
+- **Default**: Dark gradient background (`#1a1a1a` → `#0a0a0a`)
+
+```typescript
+const colorSchemes = {
+  blog: {
+    background: "linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)",
+    accent: "#60a5fa",
+    text: "#f1f5f9",
+  },
+  works: {
+    background: "linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%)",
+    accent: "#a78bfa",
+    text: "#f1f5f9",
+  },
+  default: {
+    background: "linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)",
+    accent: "#818cf8",
+    text: "#f5f5f5",
+  },
+};
+```
+
+### Dynamic Font Sizing
+
+The title font size automatically adjusts based on title length:
+
+```typescript
+const fontSize =
+  displayTitle.length > 30 ? 48 : displayTitle.length > 20 ? 56 : 64;
+```
+
+### Image Layout
+
+The OG image has three sections (`src/utils/og/generate-og-image.ts:88-195`):
+
+1. **Header**: Site logo and name
+2. **Main Title**: The content title (dynamically sized)
+3. **Footer**: Author/subtitle and domain name
+
+## Creating an API Endpoint
+
+For blog posts, create a dynamic endpoint that generates images for each post:
+
+```typescript
+import { getCollection } from "astro:content";
+import type { APIRoute, GetStaticPaths } from "astro";
+import { generateOgImage } from "../../../utils/og/generate-og-image";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const blogPosts = await getCollection("blog");
+  return blogPosts.map((post) => ({
+    params: { id: post.id },
+    props: { title: post.data.title },
+  }));
+};
+
+export const GET: APIRoute = async ({ props }) => {
+  const { title } = props as { title: string };
+
+  const png = await generateOgImage({
+    title,
+    type: "blog",
+  });
+
+  return new Response(png, {
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
+};
+```
+
+## Usage in Meta Tags
+
+Reference the generated image in your page's metadata:
+
+```html
+<meta property="og:image" content="/og/blog/my-post-id.png" />
+```
+
+## Customization Options
+
+The `generateOgImage` function accepts the following options:
+
+```typescript
+interface OgImageOptions {
+  title: string;           // Main title text
+  subtitle?: string;       // Defaults to SITE.author
+  type?: "blog" | "works" | "default"; // Color scheme
+}
+```
+
+### Example: Custom Subtitle
+
+```typescript
+const png = await generateOgImage({
+  title: "My Amazing Project",
+  subtitle: "Open Source Software",
+  type: "works",
+});
+```
+
+## Performance Considerations
+
+- **Font Caching**: The font is fetched once and cached in memory
+- **Immutable Cache**: Generated images are cached indefinitely
+- **Static Generation**: All images are pre-generated at build time
+
+## Dependencies
+
+The OG image system requires two main packages:
+
+```bash
+npm install satori @resvg/resvg-js
+```
+
+- **satori**: Converts HTML/JSX to SVG
+- **@resvg/resvg-js**: Converts SVG to PNG
+
+## Title Truncation
+
+Long titles are automatically truncated to maintain visual balance:
+
+```typescript
+const displayTitle =
+  title.length > 50 ? `${title.substring(0, 47)}...` : title;
+```

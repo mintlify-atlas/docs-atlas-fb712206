@@ -1,0 +1,456 @@
+---
+title: "Bookshelf"
+description: "Reading list management with status tracking and ratings"
+icon: "book"
+---
+
+The bookshelf feature tracks reading progress, ratings, and book metadata with a structured collection.
+
+## Books Collection Schema
+
+Defined in `src/content.config.ts:32`:
+
+```typescript
+const books = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/books" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      author: z.string(),
+      coverImage: image(),
+      status: z.enum(["read", "reading", "stacked"]),
+      finishedDate: z.coerce.date().optional(),
+      rating: z.number().min(1).max(5).optional(),
+      category: z.string().optional(),
+      tags: z.array(z.string()), // Required for books
+      excerpt: excerptSchema,
+    }),
+});
+```
+
+## Schema Fields
+
+<ParamField path="title" type="string" required>
+  Book title
+</ParamField>
+
+<ParamField path="author" type="string" required>
+  Book author name(s)
+</ParamField>
+
+<ParamField path="coverImage" type="image" required>
+  Book cover image using Astro's image optimization
+</ParamField>
+
+<ParamField path="status" type="enum" required>
+  Current reading status: `read`, `reading`, or `stacked`
+</ParamField>
+
+<ParamField path="finishedDate" type="date">
+  Date when finished reading (optional, typically used with `status: "read"`)
+</ParamField>
+
+<ParamField path="rating" type="number">
+  Personal rating from 1-5 stars (optional)
+</ParamField>
+
+<ParamField path="category" type="string">
+  Book category (e.g., "技術", "ビジネス", "小説")
+</ParamField>
+
+<ParamField path="tags" type="string[]" required>
+  Topics and themes covered in the book
+</ParamField>
+
+<ParamField path="excerpt" type="string" required>
+  Brief description or personal review
+</ParamField>
+
+## Status Field
+
+The status field tracks reading progress with three possible values:
+
+<Tabs>
+  <Tab title="read">
+    ### Finished Reading
+    
+    Books you've completed reading.
+    
+    ```mdx
+    ---
+    status: "read"
+    finishedDate: 2024-06-30
+    rating: 4
+    ---
+    ```
+    
+    <Note>
+      When using `status: "read"`, consider adding `finishedDate` and `rating` fields.
+    </Note>
+  </Tab>
+  
+  <Tab title="reading">
+    ### Currently Reading
+    
+    Books you're actively reading.
+    
+    ```mdx
+    ---
+    status: "reading"
+    ---
+    ```
+    
+    <Note>
+      For currently reading books, `finishedDate` and `rating` should be omitted.
+    </Note>
+  </Tab>
+  
+  <Tab title="stacked">
+    ### Want to Read
+    
+    Books on your to-read list or "tsundoku" stack.
+    
+    ```mdx
+    ---
+    status: "stacked"
+    ---
+    ```
+    
+    <Note>
+      "Stacked" represents the Japanese concept of "tsundoku" (積読) - books you've acquired but haven't read yet.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Rating System
+
+The rating field uses a 1-5 star scale with validation:
+
+```typescript
+rating: z.number().min(1).max(5).optional()
+```
+
+### Rating Guidelines
+
+| Stars | Meaning | When to Use |
+|-------|---------|-------------|
+| ⭐ 1 | Poor | Did not meet expectations, would not recommend |
+| ⭐⭐ 2 | Below Average | Some useful content but significant issues |
+| ⭐⭐⭐ 3 | Good | Solid book, met expectations |
+| ⭐⭐⭐⭐ 4 | Very Good | Excellent content, would recommend |
+| ⭐⭐⭐⭐⭐ 5 | Outstanding | Exceptional book, highly impactful |
+
+### Example Ratings
+
+```mdx
+---
+title: "サンプルブック"
+status: "read"
+finishedDate: 2024-06-30
+rating: 4  # Very Good - Would recommend
+---
+```
+
+<Note>
+  The rating field is optional and typically only used for books with `status: "read"`.
+</Note>
+
+## Finished Date Tracking
+
+Track when you completed reading a book:
+
+```typescript
+finishedDate: z.coerce.date().optional()
+```
+
+### Date Format
+
+Use ISO 8601 format (YYYY-MM-DD):
+
+```mdx
+---
+finishedDate: 2024-06-30
+---
+```
+
+The `z.coerce.date()` automatically converts the string to a JavaScript Date object.
+
+### Usage Pattern
+
+<CodeGroup>
+```mdx Read Book
+---
+status: "read"
+finishedDate: 2024-06-30
+rating: 4
+---
+```
+
+```mdx Currently Reading
+---
+status: "reading"
+# No finishedDate or rating
+---
+```
+
+```mdx To-Read Stack
+---
+status: "stacked"
+# No finishedDate or rating
+---
+```
+</CodeGroup>
+
+## Example Book Entry
+
+Complete example from `src/content/books/sample-book.md`:
+
+<CodeGroup>
+```markdown Frontmatter
+---
+title: "サンプルブック"
+author: "著者名"
+coverImage: "../../../public/favicon.svg"
+status: "read"
+finishedDate: 2024-06-30
+rating: 4
+category: "技術"
+tags: ["Astro", "Web", "設計"]
+excerpt: "Astroを中心に、コンテンツ設計とページ構成を学ぶための入門書。"
+---
+```
+
+```markdown Content
+# サンプルブック
+
+この本では、Astroの基本構成やコンテンツコレクションの活用方法を学びました。
+
+## 良かった点
+
+- ページ実装の流れが具体的でわかりやすい
+- サンプルコードが多く、すぐに試せる
+
+## 感想
+
+小規模なサイトを組む際に、コンテンツ管理の整理方法が明確になりました。
+```
+</CodeGroup>
+
+## Adding a New Book
+
+<Steps>
+  <Step title="Create Markdown file">
+    Create a new `.md` file in `src/content/books/`:
+    
+    ```bash
+    src/content/books/my-book.md
+    ```
+    
+    <Note>
+      Books use Markdown (`.md`) only, not MDX. This keeps book entries simpler and more focused on content.
+    </Note>
+  </Step>
+  
+  <Step title="Add cover image">
+    Place the book cover in the `public/` directory:
+    
+    ```bash
+    public/book-covers/my-book.jpg
+    ```
+  </Step>
+  
+  <Step title="Write frontmatter">
+    Include all required fields:
+    
+    ```markdown
+    ---
+    title: "The Pragmatic Programmer"
+    author: "David Thomas, Andrew Hunt"
+    coverImage: "../../../public/book-covers/pragmatic-programmer.jpg"
+    status: "read"
+    finishedDate: 2024-06-30
+    rating: 5
+    category: "技術"
+    tags: ["Software Engineering", "Best Practices", "Career"]
+    excerpt: "A timeless guide to software craftsmanship and professional development."
+    ---
+    ```
+  </Step>
+  
+  <Step title="Write review (optional)">
+    Add your thoughts, notes, and key takeaways:
+    
+    ```markdown
+    # The Pragmatic Programmer
+    
+    ## Key Takeaways
+    
+    - DRY principle (Don't Repeat Yourself)
+    - The importance of continuous learning
+    - Effective debugging strategies
+    
+    ## Personal Notes
+    
+    This book fundamentally changed how I approach software development...
+    ```
+  </Step>
+  
+  <Step title="Preview">
+    Run the dev server to see your book on the bookshelf:
+    
+    ```bash
+    npm run dev
+    ```
+  </Step>
+</Steps>
+
+## Querying Books Collection
+
+### Filter by Status
+
+```typescript
+import { getCollection } from 'astro:content';
+
+const allBooks = await getCollection('books');
+
+// Currently reading
+const currentlyReading = allBooks.filter(
+  book => book.data.status === 'reading'
+);
+
+// Finished books
+const finishedBooks = allBooks.filter(
+  book => book.data.status === 'read'
+);
+
+// To-read stack
+const toRead = allBooks.filter(
+  book => book.data.status === 'stacked'
+);
+```
+
+### Sort by Finish Date
+
+```typescript
+const recentlyFinished = finishedBooks
+  .filter(book => book.data.finishedDate)
+  .sort((a, b) => {
+    const dateA = a.data.finishedDate!.getTime();
+    const dateB = b.data.finishedDate!.getTime();
+    return dateB - dateA; // Most recent first
+  });
+```
+
+### Filter by Rating
+
+```typescript
+// Highly rated books (4-5 stars)
+const topRated = finishedBooks.filter(
+  book => book.data.rating && book.data.rating >= 4
+);
+
+// Sort by rating
+const byRating = finishedBooks
+  .filter(book => book.data.rating)
+  .sort((a, b) => b.data.rating! - a.data.rating!);
+```
+
+### Group by Category
+
+```typescript
+const byCategory = allBooks.reduce((acc, book) => {
+  const category = book.data.category || 'Uncategorized';
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(book);
+  return acc;
+}, {} as Record<string, typeof allBooks>);
+```
+
+## Display Examples
+
+### Reading Statistics
+
+```typescript
+const stats = {
+  total: allBooks.length,
+  read: allBooks.filter(b => b.data.status === 'read').length,
+  reading: allBooks.filter(b => b.data.status === 'reading').length,
+  stacked: allBooks.filter(b => b.data.status === 'stacked').length,
+  averageRating: (() => {
+    const rated = allBooks.filter(b => b.data.rating);
+    const sum = rated.reduce((acc, b) => acc + b.data.rating!, 0);
+    return rated.length > 0 ? (sum / rated.length).toFixed(1) : 'N/A';
+  })(),
+};
+```
+
+### Recent Activity
+
+```typescript
+const recentActivity = allBooks
+  .filter(book => book.data.finishedDate)
+  .sort((a, b) => 
+    b.data.finishedDate!.getTime() - a.data.finishedDate!.getTime()
+  )
+  .slice(0, 5); // Last 5 books finished
+```
+
+## File Structure
+
+```
+src/content/books/
+├── sample-book.md
+├── pragmatic-programmer.md
+├── clean-code.md
+└── designing-data-intensive-applications.md
+
+public/book-covers/
+├── pragmatic-programmer.jpg
+├── clean-code.jpg
+└── designing-data-intensive-applications.jpg
+```
+
+## Best Practices
+
+<Tabs>
+  <Tab title="Status Management">
+    - Update status promptly when starting or finishing books
+    - Use `reading` for books actively being read
+    - Move to `read` status only when completely finished
+    - Add `finishedDate` when marking as `read`
+  </Tab>
+  
+  <Tab title="Ratings">
+    - Rate books consistently using personal criteria
+    - Add ratings only after finishing the book
+    - Consider waiting a few days to let your thoughts settle
+    - Be honest - ratings are for personal tracking
+  </Tab>
+  
+  <Tab title="Reviews">
+    - Write reviews while the content is fresh
+    - Include key takeaways and practical applications
+    - Note specific chapters or sections that stood out
+    - Add personal context for why you read the book
+  </Tab>
+  
+  <Tab title="Tags">
+    - Use consistent tag names across books
+    - Include topic areas (e.g., "Software Engineering", "Design")
+    - Add skill levels if relevant (e.g., "Beginner", "Advanced")
+    - Tag specific technologies or methodologies
+  </Tab>
+</Tabs>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Content Collections" icon="folder" href="/features/content-collections">
+    Complete guide to all content collections
+  </Card>
+  <Card title="Portfolio Works" icon="briefcase" href="/features/portfolio-works">
+    Similar structure for showcasing projects
+  </Card>
+</CardGroup>

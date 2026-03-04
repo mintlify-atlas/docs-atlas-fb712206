@@ -1,0 +1,347 @@
+---
+title: 'Environment Variables'
+description: 'Configure environment variables for local development and Cloudflare Pages deployment'
+---
+
+The ta93abe portfolio uses environment variables for configuration and feature toggles. This guide covers how to set and manage them.
+
+## Environment Variables Used
+
+Based on the codebase analysis, the following environment variables are used:
+
+### Development Variables
+
+#### `import.meta.env.DEV`
+
+- **Type**: Boolean
+- **Purpose**: Determines if running in development mode
+- **Usage**: Controls Pagefind search integration
+- **Location**: `src/pages/tools.astro:913`
+
+```typescript
+const enablePagefind = !import.meta.env.DEV;
+```
+
+Pagefind search is disabled in development for faster build times.
+
+### CI/CD Variables
+
+These are used in the Playwright test configuration:
+
+#### `process.env.CI`
+
+- **Type**: Boolean (truthy/falsy)
+- **Purpose**: Detects CI environment
+- **Usage**: Adjusts test behavior for CI pipelines
+- **Location**: `playwright.config.ts`
+
+```typescript
+{
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reuseExistingServer: !process.env.CI,
+}
+```
+
+When running in CI:
+- `forbidOnly`: Prevents `.only()` tests from passing
+- `retries`: Automatically retries failed tests 2 times
+- `workers`: Runs tests sequentially (1 worker)
+- `reuseExistingServer`: Starts a fresh server for each run
+
+## Astro Built-in Variables
+
+Astro provides several built-in environment variables:
+
+### `import.meta.env.MODE`
+
+- **Values**: `development`, `production`
+- **Purpose**: Current build mode
+
+### `import.meta.env.PROD`
+
+- **Type**: Boolean
+- **Purpose**: True when running in production
+
+### `import.meta.env.DEV`
+
+- **Type**: Boolean
+- **Purpose**: True when running in development (inverse of PROD)
+
+### `import.meta.env.SITE`
+
+- **Value**: `https://ta93abe.com`
+- **Purpose**: Base URL from `astro.config.mjs`
+- **Usage**: Canonical URLs, sitemap generation, RSS feeds
+
+## Setting Environment Variables Locally
+
+### Create .env File
+
+Create a `.env` file in the project root:
+
+```bash
+# .env
+# Add your environment variables here
+```
+
+**Note**: `.env` files are already gitignored:
+
+```gitignore
+# environment variables
+.env
+.env.production
+```
+
+### Environment File Types
+
+Astro supports multiple environment files:
+
+| File | When Loaded |
+|------|-------------|
+| `.env` | All modes |
+| `.env.local` | All modes (gitignored by default) |
+| `.env.development` | Development only |
+| `.env.production` | Production only |
+
+### Accessing Variables
+
+In `.astro` and `.ts` files:
+
+```typescript
+// Safe for client-side
+const publicVar = import.meta.env.PUBLIC_API_URL;
+
+// Server-side only
+const secretKey = import.meta.env.SECRET_KEY;
+```
+
+**Important**: Only variables prefixed with `PUBLIC_` are exposed to the client. All others are server-side only.
+
+### Example .env File
+
+```bash
+# Public variables (available in browser)
+PUBLIC_SITE_NAME=ta93abe
+PUBLIC_ANALYTICS_ID=your-analytics-id
+
+# Private variables (server-side only)
+API_SECRET_KEY=your-secret-key
+```
+
+## Setting Variables in Cloudflare Pages
+
+### Via Cloudflare Dashboard
+
+1. Log in to Cloudflare Dashboard
+2. Navigate to **Workers & Pages**
+3. Select your project (`me`)
+4. Go to **Settings** → **Environment variables**
+5. Click **Add variable**
+
+### Environment Types
+
+- **Production**: Used for production deployments
+- **Preview**: Used for branch and PR previews
+
+### Adding Variables
+
+For each variable:
+
+1. Enter **Variable name** (e.g., `PUBLIC_ANALYTICS_ID`)
+2. Enter **Value**
+3. Choose environment: **Production**, **Preview**, or both
+4. Click **Save**
+
+### Using Wrangler CLI
+
+You can also set variables via Wrangler:
+
+```bash
+# Set a production variable
+px wrangler pages deployment create --env production \
+  --var PUBLIC_ANALYTICS_ID=your-id
+
+# Set a preview variable
+px wrangler pages deployment create --env preview \
+  --var PUBLIC_ANALYTICS_ID=preview-id
+```
+
+### Secrets vs Variables
+
+For sensitive data:
+
+```bash
+# Set as encrypted secret (recommended for API keys)
+px wrangler pages secret put API_SECRET_KEY
+# You'll be prompted to enter the value
+
+# Or provide directly (less secure, visible in command history)
+echo "your-secret-value" | px wrangler pages secret put API_SECRET_KEY
+```
+
+**Secrets are:**
+- Encrypted at rest
+- Not visible in the dashboard after creation
+- Only accessible at runtime
+
+## Security Best Practices
+
+### 1. Never Commit Secrets
+
+```bash
+# Always gitignore environment files
+.env
+.env.local
+.env.production
+.env.*.local
+```
+
+The project already includes these in `.gitignore:16-18`.
+
+### 2. Use PUBLIC_ Prefix Carefully
+
+Only prefix with `PUBLIC_` if the value should be exposed to the browser:
+
+```typescript
+// ✅ Safe to expose
+PUBLIC_SITE_NAME=ta93abe
+PUBLIC_CONTACT_EMAIL=hello@ta93abe.com
+
+// ❌ Never expose
+DATABASE_URL=postgres://...
+API_SECRET_KEY=sk_live_...
+PRIVATE_KEY=-----BEGIN PRIVATE KEY-----
+```
+
+### 3. Different Values per Environment
+
+Use different values for development, preview, and production:
+
+```bash
+# .env.development
+PUBLIC_API_URL=http://localhost:3000
+
+# .env.production (or Cloudflare Pages)
+PUBLIC_API_URL=https://api.ta93abe.com
+```
+
+### 4. Rotate Secrets Regularly
+
+For production secrets:
+- Rotate API keys periodically
+- Update both in Cloudflare Pages and local `.env`
+- Revoke old keys after rotation
+
+### 5. Minimize Secret Usage
+
+The ta93abe portfolio currently uses minimal environment variables, which is a good security practice:
+
+- No database credentials (static site)
+- No API keys in client code
+- No third-party service secrets
+
+### 6. Audit Dependencies
+
+Ensure dependencies don't leak environment variables:
+
+```bash
+# Check for suspicious environment access
+pnpm audit
+```
+
+## TypeScript Support
+
+For type safety, create `env.d.ts`:
+
+```typescript
+/// <reference types="astro/client" />
+
+interface ImportMetaEnv {
+  readonly PUBLIC_SITE_NAME: string;
+  readonly PUBLIC_ANALYTICS_ID?: string;
+  // Add other variables here
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+```
+
+This provides autocomplete and type checking for environment variables.
+
+## Validation
+
+Validate required environment variables at build time:
+
+```typescript
+// src/config/env.ts
+function getEnv(key: string, required = false): string | undefined {
+  const value = import.meta.env[key];
+  
+  if (required && !value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+  
+  return value;
+}
+
+export const config = {
+  siteName: getEnv('PUBLIC_SITE_NAME', true),
+  analyticsId: getEnv('PUBLIC_ANALYTICS_ID'),
+};
+```
+
+## Debugging
+
+### View Available Variables
+
+In development:
+
+```typescript
+// src/pages/debug.astro (create temporarily)
+console.log(import.meta.env);
+```
+
+**Remember to remove debug code before deploying!**
+
+### Cloudflare Pages Logs
+
+View deployment logs to check if variables are set:
+
+1. Go to Cloudflare Pages dashboard
+2. Click on a deployment
+3. View **Build logs** or **Functions logs**
+
+### Common Issues
+
+**Variable not found:**
+- Check spelling and case (environment variables are case-sensitive)
+- Ensure variable is set in correct environment (Production vs Preview)
+- Rebuild after adding new variables
+
+**PUBLIC_ variable undefined in browser:**
+- Verify it's prefixed with `PUBLIC_`
+- Restart dev server (`pnpm dev`)
+- Clear browser cache
+
+**Variable works locally but not in Cloudflare:**
+- Ensure it's set in Cloudflare Pages dashboard
+- Check correct environment (Production/Preview)
+- Trigger a new deployment after adding variables
+
+## Summary
+
+The ta93abe portfolio has a simple environment setup:
+
+- Minimal environment variables (security best practice)
+- Uses Astro's built-in `import.meta.env` variables
+- `.env` files gitignored for safety
+- Cloudflare Pages for production variable management
+
+When adding new features that require environment variables:
+1. Add to `.env` for local development
+2. Add to Cloudflare Pages dashboard for production
+3. Prefix with `PUBLIC_` only if client-side access is needed
+4. Document in TypeScript types for better DX

@@ -1,0 +1,318 @@
+---
+title: Theming
+description: Customize the visual design of your ta93abe portfolio site
+---
+
+This guide covers how to customize the theme, colors, typography, and visual elements of the ta93abe portfolio site.
+
+## TailwindCSS Integration
+
+The project uses **TailwindCSS v4** via the Vite plugin for styling. Unlike traditional Tailwind setups, v4 uses CSS-based configuration.
+
+### Global Styles
+
+All styles are defined in `src/styles/global.css`:
+
+```css
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+```
+
+## Color Scheme
+
+The site uses CSS custom properties (variables) for theming, defined in `src/styles/global.css`.
+
+### Light Mode Colors
+
+```css
+:root {
+  --primary-color: #4f46e5;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #1a1a1a;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --border-color: #e2e8f0;
+  --link-color: #2563eb;
+  --link-hover-color: #1d4ed8;
+  --blockquote-bg: #eff6ff;
+  --blockquote-border: #3b82f6;
+  --code-bg: #f1f5f9;
+  --code-text: #1e293b;
+}
+```
+
+### Customizing Colors
+
+To change the color scheme, edit the CSS variables in `src/styles/global.css`:
+
+```css
+:root {
+  --primary-color: #your-color; /* Main brand color */
+  --link-color: #your-color;    /* Link color */
+  /* Update other colors as needed */
+}
+```
+
+### Color Usage Reference
+
+| Variable | Usage |
+|----------|-------|
+| `--primary-color` | Main brand color, focus outlines |
+| `--bg-primary` | Main background color |
+| `--bg-secondary` | Secondary background, table headers |
+| `--bg-tertiary` | Tertiary background elements |
+| `--text-primary` | Primary text color |
+| `--text-secondary` | Secondary text, less emphasis |
+| `--text-muted` | Muted text, captions |
+| `--border-color` | Borders and dividers |
+| `--link-color` | Link default color |
+| `--link-hover-color` | Link hover state |
+| `--blockquote-bg` | Blockquote background |
+| `--blockquote-border` | Blockquote left border |
+| `--code-bg` | Inline code background |
+| `--code-text` | Inline code text color |
+
+## Typography
+
+The site uses **Shippori Mincho**, a Japanese serif font from Google Fonts.
+
+### Font Setup
+
+The font is imported via `@fontsource` in `src/styles/global.css`:
+
+```css
+@import "@fontsource/shippori-mincho/400.css";
+@import "@fontsource/shippori-mincho/500.css";
+@import "@fontsource/shippori-mincho/700.css";
+```
+
+Font weights available:
+- **400**: Regular
+- **500**: Medium
+- **700**: Bold
+
+### Font Family
+
+The font is applied globally in `src/layouts/Layout.astro`:
+
+```css
+html,
+body {
+  font-family: "Shippori Mincho", serif;
+}
+```
+
+### Changing the Font
+
+To use a different font:
+
+1. Install the font package:
+```bash
+pnpm add @fontsource/your-font
+```
+
+2. Import in `src/styles/global.css`:
+```css
+@import "@fontsource/your-font/400.css";
+@import "@fontsource/your-font/700.css";
+```
+
+3. Update the font-family in `src/layouts/Layout.astro`:
+```css
+html,
+body {
+  font-family: "Your Font", serif;
+}
+```
+
+### Code Block Typography
+
+Code blocks use a monospace font stack:
+
+```css
+.prose pre code {
+  font-family: "SF Mono", Menlo, Monaco, "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+```
+
+## Prose Styling
+
+The site uses Tailwind Typography plugin for article content with Zenn-inspired styling.
+
+### Base Prose Styles
+
+```css
+.prose {
+  font-size: 1rem;
+  line-height: 1.9;
+  color: rgba(0, 0, 0, 0.82);
+}
+```
+
+### Heading Styles
+
+Headings are styled with custom spacing and borders:
+
+```css
+.prose h2 {
+  font-size: 1.5rem;
+  line-height: 1.5;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid #d6e3ed;
+  margin-top: 2.5em;
+  margin-bottom: 1.1em;
+  scroll-margin-top: 4rem; /* For anchor links */
+}
+
+.prose h3 {
+  font-size: 1.3rem;
+  line-height: 1.5;
+  margin-top: 2.5em;
+  margin-bottom: 0.65em;
+  scroll-margin-top: 4rem;
+}
+```
+
+### Inline Code
+
+```css
+.prose :not(pre) > code {
+  background: #edf2f7;
+  padding: 0.17rem 0.34rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.82);
+}
+```
+
+### Blockquotes
+
+```css
+.prose blockquote {
+  border-left-color: var(--blockquote-border);
+  background: var(--blockquote-bg);
+  padding: 1rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: normal;
+}
+```
+
+### Links
+
+```css
+.prose a {
+  color: var(--link-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose a:hover {
+  color: var(--link-hover-color);
+}
+```
+
+## Syntax Highlighting
+
+Code syntax highlighting is configured in `astro.config.mjs`:
+
+```javascript
+markdown: {
+  shikiConfig: {
+    theme: "github-dark",
+    wrap: true,
+  },
+}
+```
+
+### Available Themes
+
+You can change the theme to any [Shiki theme](https://shiki.style/themes):
+
+```javascript
+shikiConfig: {
+  theme: "nord",           // Dark theme
+  // theme: "github-light", // Light theme
+  // theme: "dracula",      // Dracula theme
+}
+```
+
+## Animations
+
+The site includes scroll-triggered fade-in animations:
+
+```css
+[data-animate] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+[data-animate].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+```
+
+### Using Animations
+
+Add the `data-animate` attribute to any element:
+
+```astro
+<div data-animate>
+  <h2>This will fade in on scroll</h2>
+</div>
+```
+
+The animation observer is initialized in `src/scripts/animations/observer.ts`.
+
+## Accessibility Features
+
+### Focus Styles
+
+Custom focus styles for keyboard navigation:
+
+```css
+:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+```
+
+### Reduced Motion
+
+Respects user preferences for reduced motion:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+## Related Resources
+
+- [Site Configuration](/guides/site-configuration) - Configure site settings
+- [SEO Optimization](/guides/seo-optimization) - Improve search visibility
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [Shiki Themes](https://shiki.style/themes)

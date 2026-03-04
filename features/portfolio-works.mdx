@@ -1,0 +1,350 @@
+---
+title: "Portfolio Works"
+description: "Managing and displaying portfolio projects"
+icon: "briefcase"
+---
+
+The works collection showcases portfolio projects with cover images, tags, and rich MDX content.
+
+## Works Collection Schema
+
+Defined in `src/content.config.ts:20`:
+
+```typescript
+const works = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/works" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      coverImage: image(),
+      tags: z.array(z.string()),
+      excerpt: excerptSchema,
+    }),
+});
+```
+
+## Schema Fields
+
+<ParamField path="title" type="string" required>
+  Project title displayed in cards and headers
+</ParamField>
+
+<ParamField path="coverImage" type="image" required>
+  Cover image using Astro's built-in image optimization. Supports relative paths to image files.
+</ParamField>
+
+<ParamField path="tags" type="string[]" required>
+  Array of technologies, frameworks, or categories. Unlike the blog collection, tags are required for works.
+</ParamField>
+
+<ParamField path="excerpt" type="string" required>
+  Brief project description shown in preview cards and meta descriptions
+</ParamField>
+
+## Example Work Entry
+
+Here's a real example from `src/content/works/dbt-jobs.mdx`:
+
+```mdx Frontmatter
+---
+title: "dbt-jobs"
+coverImage: "../../../public/dbt-jobs.png"
+tags: ["GitHub Actions", "dbt", "CI/CD", "Snowflake"]
+excerpt: "dbt の CI/CD パイプラインを GitHub Actions で実行するための composite action。"
+---
+```
+
+The content includes:
+
+```mdx
+import OgpCard from "../../components/blog/OgpCard.astro";
+
+<OgpCard url="https://github.com/ta93abe/dbt-jobs" />
+
+GitHub Actions の composite action で、dbt プロジェクトの CI/CD パイプラインを構築します。
+現在は Snowflake アダプターに対応しており、アダプターの追加が容易な設計です。
+```
+
+## Cover Image Handling
+
+The works collection uses Astro's built-in image optimization for cover images.
+
+### Image Paths
+
+Cover images can be referenced using relative paths:
+
+```mdx
+---
+coverImage: "../../../public/dbt-jobs.png"
+---
+```
+
+### Image Optimization
+
+Astro automatically:
+- Optimizes image file sizes
+- Generates responsive image variants
+- Serves images in modern formats (WebP, AVIF)
+- Provides proper image dimensions for layout stability
+
+### Image Schema
+
+The `image()` helper from Astro's content collections provides:
+
+```typescript
+schema: ({ image }) =>
+  z.object({
+    coverImage: image(), // Returns optimized ImageMetadata
+    // ...
+  })
+```
+
+<Note>
+  The `image()` helper validates that the path points to a valid image file at build time.
+</Note>
+
+## Tags and Categorization
+
+Tags help categorize and filter portfolio projects.
+
+### Tag Usage
+
+Unlike blog posts where tags are optional, work items require tags:
+
+```typescript
+tags: z.array(z.string()), // Required for works
+```
+
+### Example Tag Arrays
+
+<Tabs>
+  <Tab title="Development Tools">
+    ```mdx
+    tags: ["GitHub Actions", "dbt", "CI/CD", "Snowflake"]
+    ```
+  </Tab>
+  <Tab title="Web Applications">
+    ```mdx
+    tags: ["React", "TypeScript", "Next.js", "Tailwind CSS"]
+    ```
+  </Tab>
+  <Tab title="Data Engineering">
+    ```mdx
+    tags: ["Python", "Apache Airflow", "BigQuery", "ETL"]
+    ```
+  </Tab>
+  <Tab title="Design Systems">
+    ```mdx
+    tags: ["Design System", "Storybook", "Component Library", "Accessibility"]
+    ```
+  </Tab>
+</Tabs>
+
+### Querying by Tags
+
+```typescript
+import { getCollection } from 'astro:content';
+
+const allWorks = await getCollection('works');
+
+// Filter by specific tag
+const githubActionsWorks = allWorks.filter(work =>
+  work.data.tags.includes('GitHub Actions')
+);
+
+// Filter by multiple tags (AND logic)
+const cicdTools = allWorks.filter(work => {
+  const tags = work.data.tags;
+  return tags.includes('CI/CD') && tags.includes('GitHub Actions');
+});
+
+// Get all unique tags
+const allTags = [...new Set(allWorks.flatMap(work => work.data.tags))];
+```
+
+## MDX Components Support
+
+Work entries support all MDX features available in blog posts.
+
+### Available Components
+
+<CardGroup cols={2}>
+  <Card title="OgpCard" icon="link">
+    Display GitHub or project links with OGP metadata
+  </Card>
+  <Card title="Callout" icon="info">
+    Highlight important project information
+  </Card>
+  <Card title="LinkCard" icon="card">
+    Create beautiful link previews
+  </Card>
+  <Card title="Custom Components" icon="puzzle">
+    Import any Astro component for rich content
+  </Card>
+</CardGroup>
+
+### Example Usage
+
+```mdx
+import OgpCard from "../../components/blog/OgpCard.astro";
+import Callout from "../../components/blog/Callout.astro";
+
+<OgpCard url="https://github.com/username/project" />
+
+<Callout type="tip" title="Live Demo">
+  Check out the live demo at [demo.example.com](https://demo.example.com)
+</Callout>
+```
+
+## Adding a New Work Item
+
+<Steps>
+  <Step title="Create MDX file">
+    Create a new file in `src/content/works/` with a descriptive filename:
+    
+    ```bash
+    src/content/works/my-project.mdx
+    ```
+  </Step>
+  
+  <Step title="Add cover image">
+    Place your cover image in the `public/` directory:
+    
+    ```bash
+    public/my-project-cover.png
+    ```
+    
+    <Note>
+      Recommended image size: 1200x630px for optimal display
+    </Note>
+  </Step>
+  
+  <Step title="Write frontmatter">
+    Add all required fields:
+    
+    ```mdx
+    ---
+    title: "My Awesome Project"
+    coverImage: "../../../public/my-project-cover.png"
+    tags: ["React", "TypeScript", "Tailwind CSS"]
+    excerpt: "A modern web application built with React and TypeScript, featuring responsive design and dark mode support."
+    ---
+    ```
+  </Step>
+  
+  <Step title="Write project description">
+    Include:
+    - Project overview
+    - Key features
+    - Technologies used
+    - Code examples or usage instructions
+    - Links to live demo or repository
+    
+    ```mdx
+    import OgpCard from "../../components/blog/OgpCard.astro";
+    
+    <OgpCard url="https://github.com/username/my-project" />
+    
+    ## Overview
+    
+    This project demonstrates...
+    
+    ## Key Features
+    
+    - Feature 1
+    - Feature 2
+    - Feature 3
+    ```
+  </Step>
+  
+  <Step title="Preview and test">
+    Run the dev server to preview your work:
+    
+    ```bash
+    npm run dev
+    ```
+    
+    The work will appear on the portfolio/works page.
+  </Step>
+</Steps>
+
+## File Structure
+
+```
+src/content/works/
+├── dbt-jobs.mdx
+├── my-project.mdx
+└── another-project.mdx
+
+public/
+├── dbt-jobs.png
+├── my-project-cover.png
+└── another-project-cover.png
+```
+
+## Best Practices
+
+<Tabs>
+  <Tab title="Frontmatter">
+    - Use descriptive, concise titles
+    - Include all relevant technologies in tags
+    - Write clear, compelling excerpts (150-200 characters)
+    - Verify cover image paths are correct
+  </Tab>
+  
+  <Tab title="Content">
+    - Start with project overview and OGP card
+    - Highlight key features and innovations
+    - Include code examples when relevant
+    - Add screenshots or demos if available
+    - Link to live demos and source code
+  </Tab>
+  
+  <Tab title="Images">
+    - Use consistent aspect ratio (1200x630px recommended)
+    - Optimize images before adding to public/
+    - Use descriptive filenames
+    - Consider using project screenshots as covers
+  </Tab>
+  
+  <Tab title="Tags">
+    - Use consistent tag names across works
+    - Include primary technologies first
+    - Limit to 3-6 most relevant tags
+    - Use proper capitalization ("TypeScript", not "typescript")
+  </Tab>
+</Tabs>
+
+## Querying Works Collection
+
+```typescript
+import { getCollection } from 'astro:content';
+
+// Get all works
+const allWorks = await getCollection('works');
+
+// Get work by id
+const work = allWorks.find(w => w.id === 'dbt-jobs');
+
+// Render MDX content
+if (work) {
+  const { Content } = await work.render();
+  // Use <Content /> in template
+}
+
+// Sort by custom criteria (e.g., alphabetically)
+const sortedWorks = allWorks.sort((a, b) => 
+  a.data.title.localeCompare(b.data.title)
+);
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Content Collections" icon="folder" href="/features/content-collections">
+    Complete guide to all content collections
+  </Card>
+  <Card title="Blog System" icon="pen" href="/features/blog-system">
+    MDX components also available for works
+  </Card>
+</CardGroup>

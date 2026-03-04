@@ -1,0 +1,220 @@
+---
+title: "Reading Time Calculation"
+description: "Calculate and display estimated reading time for Japanese content"
+---
+
+The portfolio includes a reading time utility optimized for **Japanese content**. Unlike English text where words are counted, this implementation counts characters, which is more accurate for Japanese.
+
+## Algorithm Overview
+
+The reading time calculator (`src/utils/reading-time.ts:7-24`) performs the following steps:
+
+1. Remove HTML tags
+2. Remove code blocks (fenced and inline)
+3. Remove whitespace
+4. Count remaining characters
+5. Calculate minutes based on reading speed
+
+## Implementation
+
+### Core Function
+
+```typescript
+export const getReadingTime = (
+  content: string,
+  wordsPerMinute = 400,
+): number => {
+  // For Japanese text, count characters instead of words
+  // Remove HTML tags, code blocks, and whitespace
+  const cleanContent = content
+    .replace(/<[^>]*>/g, "")           // Remove HTML tags
+    .replace(/```[\s\S]*?```/g, "")   // Remove code blocks
+    .replace(/`[^`]*`/g, "")           // Remove inline code
+    .replace(/\s+/g, "");              // Remove whitespace
+
+  // Calculate based on character count for Japanese
+  const characters = cleanContent.length;
+  const minutes = Math.ceil(characters / wordsPerMinute);
+
+  return Math.max(1, minutes);
+};
+```
+
+### Formatting Function
+
+The utility also includes a formatter for displaying reading time in Japanese:
+
+```typescript
+export const formatReadingTime = (minutes: number): string => {
+  return `約${minutes}分で読了`;
+};
+```
+
+This produces output like:
+- `約1分で読了` (About 1 minute to read)
+- `約5分で読了` (About 5 minutes to read)
+
+## Usage Example
+
+The reading time is calculated and displayed on blog post pages (`src/pages/blog/[id].astro:58-59`):
+
+```typescript
+import { getReadingTime, formatReadingTime } from "../../utils/reading-time";
+
+// Get the raw post content
+const post = Astro.props.post;
+
+// Calculate reading time
+const readingTime = getReadingTime(post.body || "");
+const readingTimeText = formatReadingTime(readingTime);
+
+// Display in template
+<p>{readingTimeText}</p>
+```
+
+## Reading Speed
+
+The default reading speed is **400 characters per minute**, which is a reasonable average for Japanese text. This can be customized:
+
+```typescript
+// Slower reading speed (200 chars/min)
+const readingTime = getReadingTime(content, 200);
+
+// Faster reading speed (600 chars/min)
+const readingTime = getReadingTime(content, 600);
+```
+
+## Content Cleaning
+
+### HTML Tag Removal
+
+HTML tags are stripped using a regular expression:
+
+```typescript
+.replace(/<[^>]*>/g, "")
+```
+
+This ensures that markup doesn't inflate the character count.
+
+### Code Block Removal
+
+Code blocks are removed because:
+1. They're read differently than prose
+2. They would inflate reading time estimates
+
+```typescript
+// Fenced code blocks
+.replace(/```[\s\S]*?```/g, "")
+
+// Inline code
+.replace(/`[^`]*`/g, "")
+```
+
+### Whitespace Removal
+
+For Japanese text, whitespace is typically not significant and is removed:
+
+```typescript
+.replace(/\s+/g, "")
+```
+
+## Minimum Reading Time
+
+The function always returns at least 1 minute, even for very short content:
+
+```typescript
+return Math.max(1, minutes);
+```
+
+This prevents displaying "0 minutes" for short posts.
+
+## Testing
+
+The utility includes comprehensive tests (`src/__tests__/utils/reading-time.test.ts:4-51`):
+
+### Short Content
+
+```typescript
+it("should return minimum 1 minute for short content", () => {
+  const result = getReadingTime("短いテキスト");
+  expect(result).toBe(1);
+});
+```
+
+### Character-Based Calculation
+
+```typescript
+it("should calculate reading time based on character count", () => {
+  // 800 characters at 400 chars/min = 2 minutes
+  const content = "あ".repeat(800);
+  const result = getReadingTime(content);
+  expect(result).toBe(2);
+});
+```
+
+### HTML Tag Filtering
+
+```typescript
+it("should remove HTML tags from calculation", () => {
+  const content = "<p>テスト</p><div>コンテンツ</div>";
+  const result = getReadingTime(content);
+  expect(result).toBe(1);
+});
+```
+
+### Code Block Filtering
+
+```typescript
+it("should remove code blocks from calculation", () => {
+  const content =
+    "本文テキスト```javascript\nconst x = 1;\n```続きのテキスト";
+  const result = getReadingTime(content);
+  expect(result).toBe(1);
+});
+```
+
+## Where It's Displayed
+
+Reading time is shown:
+
+1. **Blog Post Pages**: Next to the publication date
+2. **Blog Post Cards**: On the index/listing pages (if implemented)
+3. **Article Metadata**: Used for SEO purposes
+
+## Japanese vs English
+
+This implementation differs from typical English reading time calculators:
+
+| Aspect | English | Japanese |
+|--------|---------|----------|
+| **Unit** | Words | Characters |
+| **Speed** | 200-250 words/min | 400 chars/min |
+| **Whitespace** | Significant | Not significant |
+| **Calculation** | Split by spaces | Count all chars |
+
+## Adapting for Mixed Content
+
+If your content mixes Japanese and English, you might want to adjust the algorithm:
+
+```typescript
+export const getReadingTime = (content: string): number => {
+  const cleanContent = content
+    .replace(/<[^>]*>/g, "")
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/`[^`]*`/g, "");
+
+  // Count Japanese characters
+  const japaneseChars = (cleanContent.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g) || []).length;
+  
+  // Count English words
+  const englishWords = cleanContent
+    .replace(/[^\x00-\x7F]/g, "") // Remove non-ASCII
+    .split(/\s+/)
+    .filter(w => w.length > 0).length;
+
+  // Combine: 400 chars/min for Japanese, 200 words/min for English
+  const minutes = Math.ceil((japaneseChars / 400) + (englishWords / 200));
+  
+  return Math.max(1, minutes);
+};
+```

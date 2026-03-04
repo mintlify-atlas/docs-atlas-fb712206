@@ -1,0 +1,91 @@
+---
+title: Callout
+description: Display important information with visual indicators
+---
+
+The Callout component displays highlighted messages with different visual styles to convey information, warnings, tips, or danger alerts in your blog posts.
+
+## Usage
+
+Import the component in your MDX file:
+
+```mdx
+import Callout from "@/components/blog/Callout.astro";
+
+<Callout type="info" title="Did you know?">
+  This is an informational message that helps readers understand important context.
+</Callout>
+```
+
+## Props
+
+<ParamField path="type" type="'info' | 'warning' | 'danger' | 'tip'" default="info">
+  The visual style variant of the callout. Determines the color scheme and icon.
+  - `info`: Blue styling with info icon
+  - `warning`: Yellow styling with warning icon
+  - `danger`: Red styling with danger/error icon
+  - `tip`: Green styling with lightbulb icon
+</ParamField>
+
+<ParamField path="title" type="string" default="Type-based default">
+  Custom title text for the callout. If not provided, defaults to:
+  - Info (for type="info")
+  - Warning (for type="warning")
+  - Danger (for type="danger")
+  - Tip (for type="tip")
+</ParamField>
+
+## Variants
+
+### Info
+
+Use for informational messages and helpful context:
+
+```mdx
+<Callout type="info">
+  This feature is available in all modern browsers.
+</Callout>
+```
+
+### Warning
+
+Use for cautionary messages:
+
+```mdx
+<Callout type="warning" title="Compatibility Note">
+  This API is experimental and may change in future versions.
+</Callout>
+```
+
+### Danger
+
+Use for critical warnings or errors:
+
+```mdx
+<Callout type="danger" title="Breaking Change">
+  This will permanently delete your data and cannot be undone.
+</Callout>
+```
+
+### Tip
+
+Use for helpful tips and best practices:
+
+```mdx
+<Callout type="tip" title="Pro Tip">
+  You can combine multiple filters to create powerful search queries.
+</Callout>
+```
+
+## Styling
+
+The component uses Tailwind CSS classes and includes:
+- Colored left border (4px)
+- Background color matching the type
+- Icon from Heroicons
+- Responsive spacing
+- Support for nested paragraph elements
+
+## Source
+
+Location: `src/components/blog/Callout.astro:2`

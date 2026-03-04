@@ -1,0 +1,190 @@
+---
+title: Site Configuration
+description: Configure your ta93abe portfolio site settings and integrations
+---
+
+This guide covers the configuration options available in the ta93abe portfolio project.
+
+## Site Configuration
+
+The main site configuration is located in `src/config/site.ts`. This file exports a `SITE` constant that contains all the essential site metadata.
+
+### Configuration Options
+
+```typescript
+export const SITE = {
+  name: "Portfolio",
+  description: "個人ポートフォリオサイト",
+  author: "Takumi Abe",
+  url: "https://ta93abe.com",
+  slidesUrl: "https://slides.ta93abe.com",
+  locale: "ja_JP",
+  lang: "ja",
+  ensName: "ta93abe.eth",
+} as const;
+```
+
+### Configuration Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `string` | Site name displayed in titles and metadata |
+| `description` | `string` | Site description for meta tags and SEO |
+| `author` | `string` | Author name for attribution and metadata |
+| `url` | `string` | Canonical URL of the site |
+| `slidesUrl` | `string` | URL for the slides subdomain |
+| `locale` | `string` | Locale for Open Graph tags (e.g., `ja_JP`) |
+| `lang` | `string` | Language code for HTML lang attribute |
+| `ensName` | `string` | Ethereum Name Service domain |
+
+### Customizing Site Settings
+
+To customize your site settings, edit the values in `src/config/site.ts`:
+
+```typescript
+export const SITE = {
+  name: "Your Name",
+  description: "Your site description",
+  author: "Your Name",
+  url: "https://yoursite.com",
+  slidesUrl: "https://slides.yoursite.com",
+  locale: "en_US", // Change for English
+  lang: "en",      // Change for English
+  ensName: "yourname.eth",
+} as const;
+```
+
+## Astro Configuration
+
+The Astro configuration is located in `astro.config.mjs` at the project root.
+
+### Core Settings
+
+```javascript
+export default defineConfig({
+  site: "https://ta93abe.com",
+  integrations: [sitemap(), pagefind(), mdx()],
+  build: {
+    inlineStylesheets: "auto",
+  },
+  compressHTML: true,
+  prefetch: {
+    prefetchAll: false,
+    defaultStrategy: "hover",
+  },
+});
+```
+
+### Configuration Options Explained
+
+#### Site URL
+The `site` option must match your production URL for proper sitemap and RSS feed generation:
+
+```javascript
+site: "https://ta93abe.com"
+```
+
+#### Build Optimization
+
+- **inlineStylesheets**: Set to `"auto"` to automatically inline critical CSS
+- **compressHTML**: Minifies HTML output for better performance
+- **cssCodeSplit**: Enabled in Vite config for optimal CSS loading
+
+#### Prefetch Strategy
+
+The site uses hover-based prefetching for improved navigation performance:
+
+```javascript
+prefetch: {
+  prefetchAll: false,     // Only prefetch on interaction
+  defaultStrategy: "hover", // Prefetch on link hover
+}
+```
+
+## Integrations
+
+The project includes several Astro integrations:
+
+### Sitemap
+
+Automatically generates `sitemap.xml` for search engines:
+
+```javascript
+import sitemap from "@astrojs/sitemap";
+
+integrations: [sitemap()]
+```
+
+The sitemap is generated at build time and includes all pages.
+
+### Pagefind
+
+Provides full-text search functionality:
+
+```javascript
+import pagefind from "astro-pagefind";
+
+integrations: [pagefind()]
+```
+
+Pagefind indexes your content at build time and provides a lightweight search interface.
+
+### MDX
+
+Enables enhanced Markdown with JSX components:
+
+```javascript
+import mdx from "@astrojs/mdx";
+
+integrations: [mdx()]
+```
+
+## Markdown Configuration
+
+The project uses custom Markdown settings for enhanced content rendering:
+
+```javascript
+markdown: {
+  remarkPlugins: [remarkGfm],
+  shikiConfig: {
+    theme: "github-dark",
+    wrap: true,
+  },
+}
+```
+
+### Features
+
+- **GitHub Flavored Markdown**: Support for tables, task lists, and strikethrough via `remark-gfm`
+- **Syntax Highlighting**: Uses Shiki with the `github-dark` theme
+- **Code Wrapping**: Long lines wrap instead of scrolling horizontally
+
+## Vite Configuration
+
+The project uses Vite for building with TailwindCSS integration:
+
+```javascript
+vite: {
+  plugins: [tailwindcss()],
+  build: {
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {},
+    },
+  },
+}
+```
+
+### TailwindCSS Plugin
+
+Tailwind v4 is integrated via the Vite plugin for optimal performance:
+
+```javascript
+import tailwindcss from "@tailwindcss/vite";
+```
+
+## Related Resources
+
+- [Theming Guide](/guides/theming) - Customize colors and typography
+- [SEO Optimization](/guides/seo-optimization) - Improve search engine visibility
+- [Astro Configuration Reference](https://docs.astro.build/en/reference/configuration-reference/)

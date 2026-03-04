@@ -1,0 +1,135 @@
+---
+title: Button
+description: A versatile button component with multiple variants and sizes
+---
+
+The Button component is a flexible, accessible button that can render as either a `<button>` or `<a>` element depending on the props. It includes hover animations, focus states, and supports reduced motion preferences.
+
+## Props
+
+<ParamField path="variant" type="'primary' | 'secondary' | 'ghost'" default="primary">
+  The visual style variant of the button.
+  - `primary`: Solid background with white text
+  - `secondary`: Transparent with border, fills on hover
+  - `ghost`: Minimal style with subtle hover effect
+</ParamField>
+
+<ParamField path="size" type="'sm' | 'md' | 'lg'" default="md">
+  The size of the button.
+  - `sm`: Small (px-4 py-2, text-sm)
+  - `md`: Medium (px-6 py-2.5, text-base)
+  - `lg`: Large (px-8 py-3, text-lg)
+</ParamField>
+
+<ParamField path="href" type="string">
+  If provided, renders the button as an `<a>` tag with this URL.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  Disables the button and removes hover effects. If `href` is provided, the link will render as a disabled button instead.
+</ParamField>
+
+<ParamField path="type" type="'button' | 'submit' | 'reset'" default="button">
+  The HTML button type attribute. Only applies when not rendering as a link.
+</ParamField>
+
+<ParamField path="class" type="string">
+  Additional CSS classes to apply to the component.
+</ParamField>
+
+## Variants
+
+### Primary
+
+The default variant with a solid dark background.
+
+```astro
+<Button variant="primary">
+  Primary Button
+</Button>
+```
+
+### Secondary
+
+Outlined button that fills on hover.
+
+```astro
+<Button variant="secondary">
+  Secondary Button
+</Button>
+```
+
+### Ghost
+
+Minimal button with subtle hover effect.
+
+```astro
+<Button variant="ghost">
+  Ghost Button
+</Button>
+```
+
+## Sizes
+
+```astro
+<Button size="sm">Small</Button>
+<Button size="md">Medium</Button>
+<Button size="lg">Large</Button>
+```
+
+## Usage Examples
+
+### Basic Button
+
+```astro
+import Button from "@/components/ui/Button.astro";
+
+<Button>Click me</Button>
+```
+
+### Link Button
+
+When an `href` prop is provided, the button renders as a link.
+
+```astro
+<Button href="/about">About Page</Button>
+```
+
+### Submit Button
+
+```astro
+<Button type="submit" variant="primary">
+  Submit Form
+</Button>
+```
+
+### Disabled State
+
+```astro
+<Button disabled>
+  Disabled Button
+</Button>
+```
+
+### Custom Styling
+
+```astro
+<Button class="w-full" variant="secondary" size="lg">
+  Full Width Button
+</Button>
+```
+
+## Accessibility Features
+
+- **Focus Indicators**: Visible outline on keyboard focus with 2px offset
+- **Disabled State**: Proper `disabled` attribute and cursor styling
+- **Reduced Motion**: Respects `prefers-reduced-motion` media query, disabling animations and transforms
+- **Semantic HTML**: Renders appropriate element (`<button>` or `<a>`) based on context
+
+## Implementation Details
+
+The component is built with:
+- **tailwind-variants**: For type-safe variant management (src/components/ui/Button.astro:2)
+- **Rounded corners**: Full rounded borders for modern aesthetic (src/components/ui/Button.astro:5)
+- **Smooth transitions**: 200ms duration for all state changes (src/components/ui/Button.astro:5)
+- **Hover effects**: Translates up 2px and adds shadow when not disabled (src/components/ui/Button.astro:22)

@@ -1,0 +1,126 @@
+---
+title: Card
+description: A flexible container component with multiple style variants
+---
+
+The Card component is a versatile container that can be used for content grouping. It supports multiple visual styles and can optionally be rendered as a clickable link with hover effects.
+
+## Props
+
+<ParamField path="variant" type="'default' | 'outline' | 'elevated'" default="default">
+  The visual style of the card.
+  - `default`: White background with subtle shadow
+  - `outline`: Transparent background with border
+  - `elevated`: White background with prominent shadow
+</ParamField>
+
+<ParamField path="href" type="string">
+  If provided, renders the card as an `<a>` tag with hover effects (shadow and translate animation).
+</ParamField>
+
+<ParamField path="class" type="string">
+  Additional CSS classes to apply to the component.
+</ParamField>
+
+## Variants
+
+### Default
+
+White background with a subtle shadow.
+
+```astro
+<Card variant="default">
+  <h3>Card Title</h3>
+  <p>Card content goes here.</p>
+</Card>
+```
+
+### Outline
+
+Transparent background with a border.
+
+```astro
+<Card variant="outline">
+  <h3>Outlined Card</h3>
+  <p>Minimal card with border only.</p>
+</Card>
+```
+
+### Elevated
+
+White background with a prominent shadow for more emphasis.
+
+```astro
+<Card variant="elevated">
+  <h3>Elevated Card</h3>
+  <p>Stands out with larger shadow.</p>
+</Card>
+```
+
+## Usage Examples
+
+### Basic Card
+
+```astro
+import Card from "@/components/ui/Card.astro";
+
+<Card>
+  <h2>Welcome</h2>
+  <p>This is a basic card component.</p>
+</Card>
+```
+
+### Clickable Card
+
+When an `href` is provided, the card becomes interactive with hover effects.
+
+```astro
+<Card href="/blog/post-1">
+  <h3>Blog Post Title</h3>
+  <p>Click to read more...</p>
+</Card>
+```
+
+### Blog Post Card
+
+```astro
+<Card href="/blog/my-post" variant="default">
+  <div>
+    <time>March 4, 2026</time>
+    <h3>My Blog Post</h3>
+    <p>A brief excerpt of the blog post content...</p>
+  </div>
+</Card>
+```
+
+### Custom Styling
+
+```astro
+<Card class="max-w-md mx-auto" variant="elevated">
+  <div class="text-center">
+    <h3>Centered Card</h3>
+    <p>With custom width and margin.</p>
+  </div>
+</Card>
+```
+
+## Accessibility Features
+
+- **Semantic HTML**: Renders as `<div>` for static content or `<a>` for links
+- **Reduced Motion**: Respects `prefers-reduced-motion` media query, disabling transforms and transitions
+- **Interactive States**: Clear hover states with cursor pointer when clickable
+
+## Interactive States
+
+When used with an `href`, the card automatically becomes clickable:
+- Hover effect adds shadow and translates up 2px (src/components/ui/Card.astro:13)
+- Cursor changes to pointer
+- Smooth 200ms transition for all state changes (src/components/ui/Card.astro:5)
+
+## Implementation Details
+
+The component is built with:
+- **tailwind-variants**: For type-safe variant composition (src/components/ui/Card.astro:2)
+- **Flexible padding**: 24px (1.5rem) padding on all sides (src/components/ui/Card.astro:5)
+- **Rounded corners**: Large rounded borders (xl) for modern aesthetic (src/components/ui/Card.astro:5)
+- **Conditional behavior**: Automatically applies hover effects when `href` is present (src/components/ui/Card.astro:31)

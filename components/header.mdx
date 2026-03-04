@@ -1,0 +1,151 @@
+---
+title: Header
+description: Sticky navigation header with responsive mobile menu
+---
+
+The Header component provides the main site navigation with a sticky layout, desktop menu, and mobile hamburger menu.
+
+## Overview
+
+The Header component is a sticky navigation bar that appears at the top of all pages. It features:
+- Sticky positioning with backdrop blur effect
+- Responsive design with desktop and mobile views
+- Accessible mobile menu with keyboard support
+- Automatic active link detection
+
+## Location
+
+```
+src/components/Header.astro
+```
+
+## Structure
+
+The header consists of three main parts:
+1. **Logo** - Text-based logo linking to home
+2. **Desktop Navigation** - Horizontal menu for larger screens
+3. **Mobile Menu** - Collapsible hamburger menu for mobile devices
+
+## Navigation Links
+
+Navigation links are centrally managed in `src/config/navigation.ts`:
+
+```typescript
+export const NAV_LINKS: readonly NavLink[] = [
+  { href: "/works", text: "Works" },
+  { href: "/links", text: "Links" },
+  { href: "/blog", text: "Blog" },
+  { href: "/slides", text: "Slides" },
+];
+```
+
+## Usage
+
+Import and use in your layout:
+
+```astro
+---
+import Header from "../components/Header.astro";
+---
+
+<Header />
+```
+
+The Header component doesn't accept any props - navigation is configured through the `NAV_LINKS` constant.
+
+## Features
+
+### Sticky Header
+
+The header uses sticky positioning with a semi-transparent backdrop:
+
+```astro
+<header class="sticky top-0 z-50 border-b border-neutral-200 bg-white/80 backdrop-blur-sm">
+```
+
+### Desktop Navigation
+
+Displayed on medium screens and larger (768px+):
+- Horizontal menu layout
+- Auto-detected active states
+- Smooth hover transitions
+
+### Mobile Menu
+
+For screens smaller than 768px:
+- Hamburger button with animated icons
+- Slide-down menu panel
+- Touch-friendly larger tap targets
+- Accessible ARIA attributes
+
+## Mobile Menu Interactions
+
+The mobile menu includes several accessibility features:
+
+### Toggle Functionality
+```javascript
+function toggleMenu() {
+  isOpen = !isOpen;
+  mobileMenu.classList.toggle("hidden", !isOpen);
+  mobileMenu.setAttribute("aria-hidden", String(!isOpen));
+  menuButton.setAttribute("aria-expanded", String(isOpen));
+  // Icon and label updates...
+}
+```
+
+### Keyboard Support
+- Press `Escape` to close the menu
+- Focus returns to menu button on close
+
+### Auto-Close Behavior
+- Closes automatically when resizing to desktop view
+- Uses `matchMedia` for responsive detection
+
+## Dependencies
+
+The Header uses these internal components:
+
+- **Logo.astro** - Text logo component
+- **NavLink.astro** - Navigation link with active state detection
+- **NAV_LINKS** - Navigation configuration from `config/navigation.ts`
+
+## Styling
+
+The header uses Tailwind CSS classes with these key features:
+- `max-w-7xl` - Centered content container
+- `backdrop-blur-sm` - Frosted glass effect
+- Responsive display utilities (`hidden md:flex`)
+
+## Active Link Detection
+
+Active links are automatically detected by the `NavLink` component based on the current URL path:
+
+```typescript
+const isActive = href === "/" 
+  ? currentPath === "/" 
+  : currentPath.startsWith(href);
+```
+
+See [NavLink](/components/nav-link) for more details.
+
+## Accessibility
+
+The Header implements several ARIA attributes:
+- `aria-label="メインナビゲーション"` on nav element
+- `aria-expanded` on mobile menu button
+- `aria-controls` linking button to menu
+- `aria-current="page"` on active links
+- `aria-hidden` on mobile menu panel
+
+## Customization
+
+To modify navigation links, edit `src/config/navigation.ts`:
+
+```typescript
+export const NAV_LINKS: readonly NavLink[] = [
+  { href: "/your-page", text: "Your Page" },
+  // Add more links...
+];
+```
+
+The Header will automatically update with the new links in both desktop and mobile views.

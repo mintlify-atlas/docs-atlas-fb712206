@@ -1,0 +1,551 @@
+---
+title: "External Content"
+description: "RSS loader integration for Zenn, Note, and Podcast content"
+icon: "rss"
+---
+
+The portfolio automatically fetches and displays content from external platforms using RSS feeds, powered by a custom RSS loader.
+
+## RSS Loader Overview
+
+The custom RSS loader (`src/utils/rss-loader.ts`) enables Astro Content Collections to fetch and parse RSS feeds as content sources.
+
+### Architecture
+
+```typescript
+export type RSSSource = "Zenn" | "Note" | "Podcast";
+
+interface RSSItem {
+  id: string;
+  title: string;
+  url: string;
+  publishedAt: Date;
+  excerpt: string;
+  source: RSSSource;
+}
+```
+
+## RSS Loader Implementation
+
+From `src/utils/rss-loader.ts`:
+
+```typescript
+import Parser from "rss-parser";
+
+/**
+ * Create an RSS feed loader for Astro content collections
+ * @param url - The RSS feed URL
+ * @param source - The source name (Zenn, Note, Podcast)
+ * @param idPrefix - The prefix for generated IDs (e.g., "zenn", "note", "podcast")
+ */
+export const createRSSLoader = (
+  url: string,
+  source: RSSSource,
+  idPrefix: string,
+) => {
+  return async (): Promise<RSSItem[]> => {
+    try {
+      const parser = new Parser();
+      const feed = await parser.parseURL(url);
+
+      if (!feed.items) {
+        return [];
+      }
+
+      return feed.items
+        .filter(
+          (
+            item,
+          ): item is typeof item & {
+            title: string;
+            link: string;
+            pubDate: string;
+          } =>
+            typeof item.title === "string" &&
+            typeof item.link === "string" &&
+            typeof item.pubDate === "string",
+        )
+        .map((item, index) => ({
+          id: item.guid ?? `${idPrefix}-${index}`,
+          title: item.title,
+          url: item.link,
+          publishedAt: new Date(item.pubDate),
+          excerpt: item.contentSnippet ?? item.content ?? "",
+          source,
+        }));
+    } catch (error) {
+      console.error(`Error fetching ${source} RSS feed:`, error);
+      return [];
+    }
+  };
+};
+```
+
+### Key Features
+
+<CardGroup cols={2}>
+  <Card title="Type Safety" icon="shield">
+    TypeScript type guards ensure all required fields exist
+  </Card>
+  <Card title="Error Handling" icon="circle-exclamation">
+    Graceful fallback to empty array on fetch failures
+  </Card>
+  <Card title="Flexible IDs" icon="fingerprint">
+    Uses RSS GUID or generates fallback IDs
+  </Card>
+  <Card title="Content Extraction" icon="text">
+    Extracts both snippet and full content
+  </Card>
+</CardGroup>
+
+## External Article Schema
+
+All external content collections share a common schema factory:
+
+```typescript
+const externalArticleSchema = (source: RSSSource) =>
+  z.object({
+    title: z.string(),
+    url: z.string().url(),
+    publishedAt: z.date(),
+    excerpt: z.string(),
+    source: z.literal(source),
+  });
+```
+
+<ParamField path="title" type="string" required>
+  Article or episode title from the RSS feed
+</ParamField>
+
+<ParamField path="url" type="string" required>
+  Full URL to the external content (validated as proper URL)
+</ParamField>
+
+<ParamField path="publishedAt" type="date" required>
+  Publication date parsed from RSS pubDate field
+</ParamField>
+
+<ParamField path="excerpt" type="string" required>
+  Content snippet or description from the feed
+</ParamField>
+
+<ParamField path="source" type="literal" required>
+  Source identifier: `"Zenn"`, `"Note"`, or `"Podcast"`
+</ParamField>
+
+## Zenn Integration
+
+[Zenn](https://zenn.dev/) is a Japanese platform for technical articles and books.
+
+### Collection Definition
+
+From `src/content.config.ts:86`:
+
+```typescript
+const zenn = defineCollection({
+  loader: createRSSLoader("https://zenn.dev/ta93abe/feed", "Zenn", "zenn"),
+  schema: externalArticleSchema("Zenn"),
+});
+```
+
+### Feed URL Structure
+
+```
+https://zenn.dev/{username}/feed
+```
+
+Replace `{username}` with your Zenn username.
+
+### Usage Example
+
+```typescript
+import { getCollection } from 'astro:content';
+
+const zennArticles = await getCollection('zenn');
+const sortedArticles = zennArticles.sort(
+  (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime()
+);
+```
+
+<Tabs>
+  <Tab title="Display Template">
+    ```astro
+    ---
+    const zennArticles = await getCollection('zenn');
+    ---
+
+    <section>
+      <h2>Zenn Articles</h2>
+      {zennArticles.map(article => (
+        <article>
+          <h3>
+            <a href={article.data.url} target="_blank" rel="noopener">
+              {article.data.title}
+            </a>
+          </h3>
+          <time>{article.data.publishedAt.toLocaleDateString('ja-JP')}</time>
+          <p>{article.data.excerpt}</p>
+        </article>
+      ))}
+    </section>
+    ```
+  </Tab>
+  <Tab title="Data Structure">
+    ```typescript
+    {
+      id: "zenn-12345",
+      data: {
+        title: "Astroでコンテンツ管理を始める",
+        url: "https://zenn.dev/ta93abe/articles/astro-content-intro",
+        publishedAt: Date("2024-06-15"),
+        excerpt: "Astro Content Collectionsの基本的な使い方を解説します...",
+        source: "Zenn"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Note Integration
+
+[Note](https://note.com/) is a Japanese blogging and content platform.
+
+### Collection Definition
+
+From `src/content.config.ts:92`:
+
+```typescript
+const note = defineCollection({
+  loader: createRSSLoader("https://note.com/ta93abe/rss", "Note", "note"),
+  schema: externalArticleSchema("Note"),
+});
+```
+
+### Feed URL Structure
+
+```
+https://note.com/{username}/rss
+```
+
+Replace `{username}` with your Note username.
+
+### Usage Example
+
+```typescript
+import { getCollection } from 'astro:content';
+
+const noteArticles = await getCollection('note');
+const recentNotes = noteArticles
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+  .slice(0, 5); // Latest 5 articles
+```
+
+## Podcast Integration
+
+Fetch podcast episodes from RSS feeds (e.g., Anchor.fm, Spotify).
+
+### Collection Definition
+
+From `src/content.config.ts:98`:
+
+```typescript
+const podcast = defineCollection({
+  loader: createRSSLoader(
+    "https://anchor.fm/s/4dd661e8/podcast/rss",
+    "Podcast",
+    "podcast",
+  ),
+  schema: externalArticleSchema("Podcast"),
+});
+```
+
+### Feed URL Examples
+
+<Tabs>
+  <Tab title="Anchor.fm">
+    ```
+    https://anchor.fm/s/{show-id}/podcast/rss
+    ```
+  </Tab>
+  <Tab title="Spotify">
+    ```
+    https://podcasters.spotify.com/pod/show/{show-name}/feed
+    ```
+  </Tab>
+  <Tab title="Apple Podcasts">
+    Use the RSS feed URL from your podcast dashboard
+  </Tab>
+  <Tab title="Generic">
+    Any valid RSS 2.0 or Atom feed URL
+  </Tab>
+</Tabs>
+
+### Usage Example
+
+```typescript
+import { getCollection } from 'astro:content';
+
+const episodes = await getCollection('podcast');
+const latestEpisode = episodes.sort(
+  (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime()
+)[0];
+```
+
+## Fetching Content
+
+External content is fetched at build time by Astro's content layer.
+
+### Build-Time Fetching
+
+```bash
+npm run build
+```
+
+During build:
+1. RSS loader fetches feeds from external URLs
+2. Content is parsed and validated against schema
+3. Items are stored as content collection entries
+4. Pages are generated with the fetched content
+
+### Development Mode
+
+In dev mode, RSS feeds are fetched on server start:
+
+```bash
+npm run dev
+```
+
+<Note>
+  Content is cached during the dev server session. Restart the server to fetch fresh content.
+</Note>
+
+## Combining External and Local Content
+
+You can combine external content with local blog posts:
+
+```typescript
+import { getCollection } from 'astro:content';
+
+// Get all content sources
+const blog = await getCollection('blog');
+const zenn = await getCollection('zenn');
+const note = await getCollection('note');
+
+// Combine and sort chronologically
+const allArticles = [
+  ...blog.map(post => ({
+    title: post.data.title,
+    date: post.data.date,
+    url: `/blog/${post.id}/`,
+    source: 'Blog',
+    excerpt: post.data.excerpt,
+  })),
+  ...zenn.map(article => ({
+    title: article.data.title,
+    date: article.data.publishedAt,
+    url: article.data.url,
+    source: article.data.source,
+    excerpt: article.data.excerpt,
+  })),
+  ...note.map(article => ({
+    title: article.data.title,
+    date: article.data.publishedAt,
+    url: article.data.url,
+    source: article.data.source,
+    excerpt: article.data.excerpt,
+  })),
+].sort((a, b) => b.date.getTime() - a.date.getTime());
+```
+
+## Error Handling
+
+The RSS loader includes robust error handling:
+
+### Feed Fetch Failures
+
+```typescript
+try {
+  const parser = new Parser();
+  const feed = await parser.parseURL(url);
+  // ...
+} catch (error) {
+  console.error(`Error fetching ${source} RSS feed:`, error);
+  return []; // Return empty array on error
+}
+```
+
+### Missing Fields
+
+Type guards ensure required fields exist:
+
+```typescript
+.filter(
+  (item): item is typeof item & {
+    title: string;
+    link: string;
+    pubDate: string;
+  } =>
+    typeof item.title === "string" &&
+    typeof item.link === "string" &&
+    typeof item.pubDate === "string",
+)
+```
+
+Items missing required fields are automatically filtered out.
+
+## Testing RSS Feeds
+
+Test suite from `src/__tests__/rss-loader.test.ts`:
+
+<CodeGroup>
+```typescript Zenn Test
+import Parser from "rss-parser";
+
+describe("Zenn RSS Feed", () => {
+  it("should fetch and parse Zenn RSS feed", async () => {
+    const parser = new Parser();
+    const feed = await parser.parseURL("https://zenn.dev/ta93abe/feed");
+    
+    expect(feed).toBeDefined();
+    expect(feed.items).toBeDefined();
+    expect(feed.items!.length).toBeGreaterThan(0);
+  });
+});
+```
+
+```typescript Note Test
+describe("Note RSS Feed", () => {
+  it("should fetch and parse Note RSS feed", async () => {
+    const parser = new Parser();
+    const feed = await parser.parseURL("https://note.com/ta93abe/rss");
+    
+    expect(feed).toBeDefined();
+    expect(feed.items).toBeDefined();
+  });
+});
+```
+
+```typescript Podcast Test
+describe("Podcast RSS Feed", () => {
+  it("should fetch and parse Podcast RSS feed", async () => {
+    const parser = new Parser();
+    const feed = await parser.parseURL(
+      "https://anchor.fm/s/4dd661e8/podcast/rss"
+    );
+    
+    expect(feed).toBeDefined();
+    expect(feed.items).toBeDefined();
+  });
+});
+```
+</CodeGroup>
+
+## Adding New External Sources
+
+To add a new external content source:
+
+<Steps>
+  <Step title="Update RSSSource type">
+    Add your source to the type definition:
+    
+    ```typescript
+    export type RSSSource = "Zenn" | "Note" | "Podcast" | "Medium";
+    ```
+  </Step>
+  
+  <Step title="Define collection">
+    Add a new collection in `src/content.config.ts`:
+    
+    ```typescript
+    const medium = defineCollection({
+      loader: createRSSLoader(
+        "https://medium.com/feed/@username",
+        "Medium",
+        "medium"
+      ),
+      schema: externalArticleSchema("Medium"),
+    });
+    ```
+  </Step>
+  
+  <Step title="Export collection">
+    Add to the collections export:
+    
+    ```typescript
+    export const collections = {
+      works,
+      books,
+      blog,
+      talks,
+      zenn,
+      note,
+      podcast,
+      medium, // New collection
+    };
+    ```
+  </Step>
+  
+  <Step title="Use in pages">
+    Query and display the new content:
+    
+    ```typescript
+    import { getCollection } from 'astro:content';
+    const mediumPosts = await getCollection('medium');
+    ```
+  </Step>
+</Steps>
+
+## Dependencies
+
+The RSS loader uses the `rss-parser` package:
+
+```json
+{
+  "dependencies": {
+    "rss-parser": "^3.13.0"
+  }
+}
+```
+
+## Best Practices
+
+<Tabs>
+  <Tab title="Feed URLs">
+    - Use HTTPS URLs when available
+    - Verify feed URL works before adding
+    - Check feed update frequency
+    - Consider rate limiting for frequently updated feeds
+  </Tab>
+  
+  <Tab title="Error Handling">
+    - Always return empty array on errors
+    - Log errors for debugging
+    - Don't crash the build on feed failures
+    - Consider adding retry logic for transient failures
+  </Tab>
+  
+  <Tab title="Performance">
+    - RSS feeds are fetched at build time
+    - No runtime performance impact
+    - Consider caching for local development
+    - Rebuild to fetch fresh content
+  </Tab>
+  
+  <Tab title="Content">
+    - Validate excerpt length and format
+    - Handle missing content gracefully
+    - Preserve external URLs correctly
+    - Add source badges for visual distinction
+  </Tab>
+</Tabs>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Content Collections" icon="folder" href="/features/content-collections">
+    Understanding all content collection types
+  </Card>
+  <Card title="Blog System" icon="pen" href="/features/blog-system">
+    Local blog content with RSS feed generation
+  </Card>
+</CardGroup>

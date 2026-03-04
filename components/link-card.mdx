@@ -1,0 +1,130 @@
+---
+title: Link Card
+description: Create beautiful link previews with or without OGP metadata
+---
+
+The portfolio includes two link card components for creating visually appealing external link previews in blog posts: **LinkCard** for manual configuration and **OgpCard** for automatic metadata fetching.
+
+## LinkCard
+
+A simple, manually configured link card component.
+
+### Usage
+
+```mdx
+import LinkCard from "@/components/blog/LinkCard.astro";
+
+<LinkCard
+  href="https://astro.build"
+  title="Astro"
+  description="Build faster websites with less client-side JavaScript"
+/>
+```
+
+### Props
+
+<ParamField path="href" type="string" required>
+  The URL to link to. The domain is automatically extracted and displayed.
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  The title text for the link card.
+</ParamField>
+
+<ParamField path="description" type="string">
+  Optional description text. Limited to 2 lines with ellipsis overflow.
+</ParamField>
+
+### Features
+
+- Automatically extracts and displays domain from URL
+- External link icon indicator
+- Hover effects with subtle shadow
+- Opens in new tab with security attributes
+- Responsive design with text truncation
+
+## OgpCard
+
+Automatically fetches Open Graph Protocol (OGP) metadata from URLs to create rich link previews.
+
+### Usage
+
+```mdx
+import OgpCard from "@/components/blog/OgpCard.astro";
+
+<OgpCard url="https://github.com" />
+```
+
+The component will automatically fetch:
+- Page title (from `og:title` or `<title>` tag)
+- Description (from `og:description` or meta description)
+- Preview image (from `og:image`)
+- Favicon
+- Domain name
+
+### Props
+
+<ParamField path="url" type="string" required>
+  The URL to fetch OGP metadata from and link to.
+</ParamField>
+
+### Features
+
+- **Automatic metadata fetching** at build time
+- **Favicon display** using Google's favicon service
+- **Image preview** on the right side (responsive width)
+- **Fallback handling** if metadata fetch fails
+- **Optimized images** with lazy loading
+- **Responsive layout** with different image widths on mobile/desktop
+
+### OGP Fetching
+
+The component uses the `fetchOgpData` utility (`src/utils/ogp.ts:24`) which:
+
+1. Fetches the target URL at build time
+2. Parses HTML to extract OGP meta tags
+3. Falls back to standard meta tags if OGP tags are missing
+4. Returns domain name if all metadata extraction fails
+5. Handles errors gracefully with console logging
+
+```typescript
+// Return type from fetchOgpData
+interface OgpData {
+  title: string;
+  description: string;
+  image: string;
+  favicon: string;
+  url: string;
+  domain: string;
+}
+```
+
+## When to Use
+
+**Use LinkCard when:**
+- You want full control over title and description
+- The target site doesn't have OGP metadata
+- You want to avoid build-time HTTP requests
+- You need faster build times
+
+**Use OgpCard when:**
+- You want automatic, rich previews
+- The target site has good OGP metadata
+- You want to display preview images
+- Build-time is not a concern
+
+## Styling
+
+Both components share similar styling:
+- Border with hover effects
+- Neutral color scheme
+- Responsive padding and spacing
+- Link arrow/indicator icons
+- No underline decoration
+- Smooth transitions
+
+## Source
+
+- LinkCard: `src/components/blog/LinkCard.astro:2`
+- OgpCard: `src/components/blog/OgpCard.astro:4`
+- OGP Utility: `src/utils/ogp.ts:24`

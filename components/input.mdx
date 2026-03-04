@@ -1,0 +1,210 @@
+---
+title: Input
+description: An accessible form input component with label, error handling, and validation states
+---
+
+The Input component is a fully-featured form input with integrated label, error messaging, and accessibility support. It handles multiple input types and provides visual feedback for validation states.
+
+## Props
+
+<ParamField path="type" type="'text' | 'email' | 'search' | 'password'" default="text">
+  The HTML input type.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  The name attribute for the input field.
+</ParamField>
+
+<ParamField path="id" type="string" required>
+  The unique identifier for the input field. Used for label association and error messages.
+</ParamField>
+
+<ParamField path="label" type="string">
+  Label text displayed above the input. If provided, renders a `<label>` element associated with the input.
+</ParamField>
+
+<ParamField path="placeholder" type="string">
+  Placeholder text shown when the input is empty.
+</ParamField>
+
+<ParamField path="error" type="string">
+  Error message to display below the input. When present, the input displays error styling.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  Disables the input field and applies disabled styling.
+</ParamField>
+
+<ParamField path="required" type="boolean" default="false">
+  Marks the input as required. Adds a red asterisk to the label and sets the HTML required attribute.
+</ParamField>
+
+<ParamField path="value" type="string">
+  The default value for the input field.
+</ParamField>
+
+<ParamField path="class" type="string">
+  Additional CSS classes to apply to the input element.
+</ParamField>
+
+## Usage Examples
+
+### Basic Input
+
+```astro
+import Input from "@/components/ui/Input.astro";
+
+<Input
+  id="username"
+  name="username"
+  label="Username"
+  placeholder="Enter your username"
+/>
+```
+
+### Email Input
+
+```astro
+<Input
+  type="email"
+  id="email"
+  name="email"
+  label="Email Address"
+  placeholder="you@example.com"
+  required
+/>
+```
+
+### Input with Error
+
+```astro
+<Input
+  id="email"
+  name="email"
+  label="Email"
+  value="invalid-email"
+  error="Please enter a valid email address"
+/>
+```
+
+### Password Input
+
+```astro
+<Input
+  type="password"
+  id="password"
+  name="password"
+  label="Password"
+  placeholder="Enter your password"
+  required
+/>
+```
+
+### Search Input
+
+```astro
+<Input
+  type="search"
+  id="search"
+  name="search"
+  placeholder="Search..."
+/>
+```
+
+### Disabled Input
+
+```astro
+<Input
+  id="readonly-field"
+  name="readonly-field"
+  label="Read Only"
+  value="Cannot be changed"
+  disabled
+/>
+```
+
+### Form Example
+
+```astro
+<form>
+  <Input
+    type="text"
+    id="fullname"
+    name="fullname"
+    label="Full Name"
+    placeholder="John Doe"
+    required
+  />
+  
+  <Input
+    type="email"
+    id="email"
+    name="email"
+    label="Email"
+    placeholder="john@example.com"
+    required
+  />
+  
+  <Input
+    type="password"
+    id="password"
+    name="password"
+    label="Password"
+    required
+  />
+</form>
+```
+
+## Validation States
+
+### Default State
+
+Neutral border with primary color focus ring.
+
+```astro
+<Input id="field" name="field" label="Field" />
+```
+
+### Error State
+
+When an `error` prop is provided:
+- Red border and background tint (src/components/ui/Input.astro:8)
+- Red focus ring
+- Error message displayed below with alert role (src/components/ui/Input.astro:78-80)
+
+```astro
+<Input
+  id="field"
+  name="field"
+  label="Field"
+  error="This field is required"
+/>
+```
+
+## Accessibility Features
+
+- **Associated Labels**: Label is properly linked to input via `for` attribute (src/components/ui/Input.astro:56)
+- **Required Indicator**: Visual asterisk and HTML required attribute (src/components/ui/Input.astro:60)
+- **Error Messaging**: 
+  - `aria-invalid` attribute when error is present (src/components/ui/Input.astro:72)
+  - `aria-describedby` links to error message (src/components/ui/Input.astro:73)
+  - Error message has `role="alert"` for screen readers (src/components/ui/Input.astro:78)
+- **Focus States**: Clear focus ring with 2px width and offset (src/components/ui/Input.astro:5)
+- **Disabled State**: Proper disabled attribute and visual feedback (src/components/ui/Input.astro:13)
+
+## Styling
+
+The input uses a modern, clean design:
+- **Full width**: Expands to container width (src/components/ui/Input.astro:5)
+- **Rounded corners**: Large rounded borders for modern feel (src/components/ui/Input.astro:5)
+- **Comfortable padding**: 16px horizontal, 10px vertical (src/components/ui/Input.astro:5)
+- **Focus ring**: 2px ring with 1px offset using primary color (src/components/ui/Input.astro:5)
+- **Smooth transitions**: 200ms color transitions (src/components/ui/Input.astro:5)
+
+## Implementation Details
+
+The component is built with:
+- **tailwind-variants**: For type-safe state management (src/components/ui/Input.astro:2)
+- **Wrapper div**: Groups label, input, and error message (src/components/ui/Input.astro:52)
+- **Conditional rendering**: Label and error only render when provided
+- **Custom properties**: Uses CSS variables for theming (e.g., `--primary-color`) (src/components/ui/Input.astro:10)

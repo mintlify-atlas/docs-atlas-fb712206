@@ -1,0 +1,436 @@
+---
+title: Components
+description: Component architecture and usage patterns in the ta93abe portfolio
+---
+
+# Components
+
+The ta93abe portfolio uses Astro components to build a modular, reusable UI. Components are organized by category and follow consistent patterns.
+
+## Component Architecture
+
+### Component Categories
+
+Components are organized into three main categories:
+
+1. **UI Components** (`src/components/ui/`) - Generic, reusable design system components
+2. **Blog Components** (`src/components/blog/`) - Blog-specific features
+3. **Landing Components** (`src/components/landing/`) - Landing page sections
+4. **Layout Components** (root level) - Site structure components
+
+## UI Components
+
+Generic components that form the design system.
+
+### Button (`ui/Button.astro`)
+
+A versatile button component with variant and size options.
+
+**Props:**
+```typescript
+interface Props {
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
+  href?: string;
+  disabled?: boolean;
+  class?: string;
+  type?: "button" | "submit" | "reset";
+}
+```
+
+**Usage:**
+```astro
+import Button from "@/components/ui/Button.astro";
+
+<Button variant="primary" size="lg" href="/works">
+  View Works
+</Button>
+
+<Button variant="secondary" size="md">
+  Click Me
+</Button>
+
+<Button variant="ghost" size="sm" disabled>
+  Disabled
+</Button>
+```
+
+**Features:**
+- Three variants: primary, secondary, ghost
+- Three sizes: sm, md, lg
+- Can render as `<a>` or `<button>` based on `href` prop
+- Hover effects with translate and shadow
+- Focus-visible outline
+- Respects `prefers-reduced-motion`
+- Uses `tailwind-variants` for style composition
+
+### Card (`ui/Card.astro`)
+
+Container component for content cards.
+
+**Usage:**
+```astro
+import Card from "@/components/ui/Card.astro";
+
+<Card>
+  <h3>Card Title</h3>
+  <p>Card content goes here</p>
+</Card>
+```
+
+### Badge (`ui/Badge.astro`)
+
+Small status or label indicator.
+
+### Tag (`ui/Tag.astro`)
+
+Tags for categorization and filtering.
+
+### Input (`ui/Input.astro`)
+
+Text input component.
+
+### Select (`ui/Select.astro`)
+
+Select dropdown component.
+
+### Skeleton (`ui/Skeleton.astro`)
+
+Loading skeleton placeholder.
+
+### Spinner (`ui/Spinner.astro`)
+
+Loading spinner indicator.
+
+### NavLink (`ui/NavLink.astro`)
+
+Navigation link with active state.
+
+### FilterChip (`ui/FilterChip.astro`)
+
+Chip component for filters.
+
+### CardSkeleton (`ui/CardSkeleton.astro`)
+
+Skeleton specifically for card layouts.
+
+### EmptyState (`ui/EmptyState.astro`)
+
+Empty state placeholder.
+
+### BackToTop (`ui/BackToTop.astro`)
+
+Scroll-to-top button.
+
+## Blog Components
+
+Specialized components for blog functionality.
+
+### Callout (`blog/Callout.astro`)
+
+Highlight boxes for important information.
+
+**Props:**
+```typescript
+interface Props {
+  type?: "info" | "warning" | "danger" | "tip";
+  title?: string;
+}
+```
+
+**Usage:**
+```astro
+import Callout from "@/components/blog/Callout.astro";
+
+<Callout type="info" title="Note">
+  This is an informational callout.
+</Callout>
+
+<Callout type="warning">
+  Warning: Proceed with caution.
+</Callout>
+
+<Callout type="danger" title="Important">
+  Critical information here.
+</Callout>
+
+<Callout type="tip">
+  Pro tip: Use this feature!
+</Callout>
+```
+
+**Features:**
+- Four types with color-coded styling
+- Custom or default titles
+- Icon per type
+- Bordered left accent
+- Colored backgrounds
+
+**Type Styles:**
+```typescript
+const styles = {
+  info: {
+    container: "border-blue-500 bg-blue-50",
+    icon: "text-blue-500",
+    title: "text-blue-800",
+  },
+  warning: {
+    container: "border-yellow-500 bg-yellow-50",
+    icon: "text-yellow-500",
+    title: "text-yellow-800",
+  },
+  danger: {
+    container: "border-red-500 bg-red-50",
+    icon: "text-red-500",
+    title: "text-red-800",
+  },
+  tip: {
+    container: "border-green-500 bg-green-50",
+    icon: "text-green-500",
+    title: "text-green-800",
+  },
+};
+```
+
+### LinkCard (`blog/LinkCard.astro`)
+
+Card for external links.
+
+### OgpCard (`blog/OgpCard.astro`)
+
+Rich preview cards with OGP metadata.
+
+### ShareButtons (`blog/ShareButtons.astro`)
+
+Social sharing buttons for blog posts.
+
+## Landing Components
+
+Components for the landing page.
+
+### HeroSection (`landing/HeroSection.astro`)
+
+Main hero section of the homepage.
+
+**Structure:**
+```astro
+import Button from "../ui/Button.astro";
+
+<section id="hero" class="hero-section">
+  <div class="hero-content">
+    <div class="hero-greeting">
+      <span>Welcome to my portfolio</span>
+    </div>
+    
+    <h1 class="hero-title">
+      <span class="hero-name">ta93abe</span>
+    </h1>
+    
+    <p class="hero-description">
+      Software Engineer & Creative Developer
+    </p>
+    
+    <div class="hero-cta">
+      <Button href="/works" variant="primary" size="lg">View Works</Button>
+      <Button href="/links" variant="secondary" size="lg">Links</Button>
+    </div>
+  </div>
+</section>
+```
+
+**Features:**
+- Full viewport height (`100dvh`)
+- Centered content
+- Responsive typography with `clamp()`
+- Mobile-optimized (`100svh` on mobile)
+- CSS custom properties for theming
+- Call-to-action buttons
+
+### LinksSection (`landing/LinksSection.astro`)
+
+Links section on the landing page.
+
+## Layout Components
+
+Structural components at the root level.
+
+### Header (`Header.astro`)
+
+Site header with navigation.
+
+### Footer (`Footer.astro`)
+
+Site footer with links and info.
+
+### Logo (`Logo.astro`)
+
+Site logo component.
+
+### SnsLinks (`SnsLinks.astro`)
+
+Social media links.
+
+### Breadcrumb (`Breadcrumb.astro`)
+
+Breadcrumb navigation.
+
+### FilterSort (`FilterSort.astro`)
+
+Filter and sort controls.
+
+### PostNavigation (`PostNavigation.astro`)
+
+Previous/next post navigation.
+
+### RelatedPosts (`RelatedPosts.astro`)
+
+Related posts listing.
+
+### Skeleton (`Skeleton.astro`)
+
+Content loading skeleton.
+
+## Component Patterns
+
+### Props Interface
+
+All components define TypeScript interfaces for props:
+
+```astro
+---
+interface Props {
+  variant?: "primary" | "secondary";
+  size?: "sm" | "md" | "lg";
+  class?: string;
+}
+
+const { 
+  variant = "primary", 
+  size = "md",
+  class: className = ""
+} = Astro.props;
+---
+```
+
+### Style Composition
+
+Components use `tailwind-variants` for composable styles:
+
+```typescript
+import { tv } from "tailwind-variants";
+
+const button = tv({
+  base: "inline-flex items-center justify-center rounded-full",
+  variants: {
+    variant: {
+      primary: "bg-neutral-900 text-white",
+      secondary: "bg-transparent border-2",
+    },
+    size: {
+      sm: "px-4 py-2 text-sm",
+      md: "px-6 py-2.5 text-base",
+    },
+  },
+  defaultVariants: {
+    variant: "primary",
+    size: "md",
+  },
+});
+```
+
+### Slot Usage
+
+Components use Astro's slot system:
+
+```astro
+<div class="card">
+  <slot />
+</div>
+```
+
+### Conditional Rendering
+
+Components handle conditional rendering in the template:
+
+```astro
+{
+  href && !disabled ? (
+    <a href={href} class={classes}>
+      <slot />
+    </a>
+  ) : (
+    <button type={type} disabled={disabled} class={classes}>
+      <slot />
+    </button>
+  )
+}
+```
+
+### Scoped Styles
+
+Components use scoped `<style>` blocks:
+
+```astro
+<style>
+  .hero-section {
+    min-height: 100dvh;
+  }
+  
+  @media (max-width: 768px) {
+    .hero-section {
+      min-height: 100svh;
+    }
+  }
+</style>
+```
+
+### Accessibility
+
+Components include accessibility features:
+- Focus-visible outlines
+- ARIA attributes
+- Semantic HTML
+- Keyboard navigation support
+- Reduced motion support
+
+## Component Composition
+
+Components are composed to build complex UIs:
+
+```astro
+---
+import Layout from "@/layouts/Layout.astro";
+import HeroSection from "@/components/landing/HeroSection.astro";
+import Card from "@/components/ui/Card.astro";
+import Button from "@/components/ui/Button.astro";
+---
+
+<Layout title="Home">
+  <HeroSection />
+  
+  <section>
+    <Card>
+      <h2>Featured Work</h2>
+      <p>Check out my latest projects</p>
+      <Button href="/works">View All</Button>
+    </Card>
+  </section>
+</Layout>
+```
+
+## Best Practices
+
+1. **Single Responsibility** - Each component has one clear purpose
+2. **Props Over Slots** - Use props for data, slots for content
+3. **TypeScript Interfaces** - Always define prop types
+4. **Default Values** - Provide sensible defaults
+5. **Composability** - Build complex UIs from simple components
+6. **Accessibility** - Include ARIA and semantic HTML
+7. **Responsive Design** - Use responsive utilities and media queries
+8. **Performance** - Keep components lightweight
+
+## Next Steps
+
+- [Learn about Styling →](/development/styling)
+- [Testing Components →](/development/testing)
+- [Project Structure →](/development/project-structure)

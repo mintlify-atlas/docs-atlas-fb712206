@@ -1,0 +1,172 @@
+---
+title: Footer
+description: Simple copyright footer component
+---
+
+The Footer component displays copyright information at the bottom of each page.
+
+## Overview
+
+A minimal footer component that shows the current year and copyright notice. It features a clean, centered design with a subtle border and neutral background.
+
+## Location
+
+```
+src/components/Footer.astro
+```
+
+## Usage
+
+Import and use in your layout:
+
+```astro
+---
+import Footer from "../components/Footer.astro";
+---
+
+<Footer />
+```
+
+The Footer component doesn't accept any props.
+
+## Structure
+
+The footer consists of:
+- Top border separator
+- Centered copyright text
+- Neutral background color
+
+## Implementation
+
+```astro
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-neutral-200 bg-neutral-50" role="contentinfo">
+  <div class="mx-auto max-w-7xl px-6 py-8">
+    <div class="flex flex-col items-center">
+      <p class="text-sm text-neutral-600">
+        &copy; {currentYear} ta93abe. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
+```
+
+## Features
+
+### Dynamic Year
+
+The copyright year updates automatically based on the current date:
+
+```javascript
+const currentYear = new Date().getFullYear();
+```
+
+### Centered Layout
+
+Content is centered with consistent padding:
+- `max-w-7xl` - Matches site-wide max width
+- `px-6 py-8` - Responsive padding
+- `flex flex-col items-center` - Centered alignment
+
+## Styling
+
+The footer uses these Tailwind classes:
+- `border-t border-neutral-200` - Subtle top border
+- `bg-neutral-50` - Light neutral background
+- `text-sm text-neutral-600` - Small, muted text
+
+## Accessibility
+
+The footer includes:
+- `role="contentinfo"` - Semantic landmark role
+- Clear copyright symbol and text
+
+## Site Configuration
+
+The site owner name ("ta93abe") comes from the SITE configuration in `src/config/site.ts`:
+
+```typescript
+export const SITE = {
+  name: "Portfolio",
+  description: "個人ポートフォリオサイト",
+  author: "Takumi Abe",
+  url: "https://ta93abe.com",
+  slidesUrl: "https://slides.ta93abe.com",
+  locale: "ja_JP",
+  lang: "ja",
+  ensName: "ta93abe.eth",
+} as const;
+```
+
+## Customization
+
+### Adding Social Links
+
+To add social media links, you could extend the footer:
+
+```astro
+<footer class="border-t border-neutral-200 bg-neutral-50" role="contentinfo">
+  <div class="mx-auto max-w-7xl px-6 py-8">
+    <div class="flex flex-col items-center gap-4">
+      <!-- Social links -->
+      <div class="flex gap-4">
+        <a href="https://github.com/yourusername">GitHub</a>
+        <a href="https://twitter.com/yourusername">Twitter</a>
+      </div>
+      
+      <!-- Copyright -->
+      <p class="text-sm text-neutral-600">
+        &copy; {currentYear} ta93abe. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
+```
+
+### Using Navigation Links
+
+The configuration file includes `FOOTER_LINKS` for future use:
+
+```typescript
+export const FOOTER_LINKS: readonly NavLink[] = [
+  { href: "/", text: "Home" },
+  { href: "/works", text: "Works" },
+  { href: "/blog", text: "Blog" },
+];
+```
+
+You can import and use these in the footer:
+
+```astro
+---
+import { FOOTER_LINKS } from "../config/navigation";
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-neutral-200 bg-neutral-50" role="contentinfo">
+  <div class="mx-auto max-w-7xl px-6 py-8">
+    <div class="flex flex-col items-center gap-6">
+      <!-- Navigation -->
+      <nav>
+        <ul class="flex gap-6">
+          {FOOTER_LINKS.map((link) => (
+            <li>
+              <a href={link.href} class="text-sm hover:opacity-70">
+                {link.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      
+      <!-- Copyright -->
+      <p class="text-sm text-neutral-600">
+        &copy; {currentYear} ta93abe. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
+```

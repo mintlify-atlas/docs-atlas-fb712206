@@ -1,0 +1,251 @@
+---
+title: 'Cloudflare Pages Deployment'
+description: 'Deploy your ta93abe portfolio to Cloudflare Pages using Wrangler CLI'
+---
+
+The ta93abe portfolio is deployed to Cloudflare Pages, leveraging Cloudflare's global CDN for fast, reliable performance.
+
+## Prerequisites
+
+Before deploying, ensure you have:
+
+- A Cloudflare account
+- Node.js and pnpm installed
+- Wrangler CLI (included as a dev dependency)
+
+## Cloudflare Configuration
+
+The project uses Wrangler for deployment configuration, defined in `wrangler.jsonc`:
+
+```json
+{
+  "name": "me",
+  "compatibility_date": "2026-01-01",
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
+```
+
+### Configuration Options
+
+- **name**: Project identifier in Cloudflare
+- **compatibility_date**: Cloudflare Workers runtime compatibility date
+- **assets.directory**: Build output directory (`./dist`)
+- **html_handling**: Automatically handles trailing slashes for clean URLs
+- **not_found_handling**: Serves custom 404 page
+- **observability**: Enables Cloudflare analytics and monitoring
+
+## Build Configuration
+
+The Astro build is configured in `astro.config.mjs`:
+
+```javascript
+export default defineConfig({
+  site: "https://ta93abe.com",
+  integrations: [sitemap(), pagefind(), mdx()],
+  build: {
+    inlineStylesheets: "auto",
+  },
+  compressHTML: true,
+  prefetch: {
+    prefetchAll: false,
+    defaultStrategy: "hover",
+  }
+});
+```
+
+Key features:
+- Static site generation with Astro
+- Automatic sitemap generation
+- Pagefind search integration
+- MDX support for enhanced content
+- HTML compression for optimal performance
+
+## Deployment Commands
+
+### Build the Site
+
+```bash
+pnpm build
+```
+
+This command:
+1. Runs Astro's build process
+2. Generates static files in the `./dist` directory
+3. Creates the sitemap and search index
+4. Optimizes assets and compresses HTML
+
+### Deploy to Cloudflare Pages
+
+```bash
+pnpm deploy
+```
+
+This command runs: `pnpm build && wrangler deploy`
+
+1. Builds the production site
+2. Uploads the `./dist` directory to Cloudflare Pages
+3. Deploys to the production domain
+
+### Manual Deployment with Wrangler
+
+You can also use Wrangler directly:
+
+```bash
+# Deploy to production
+px wrangler deploy
+
+# Deploy with specific environment
+px wrangler deploy --env production
+```
+
+## Authentication
+
+Authenticate with Cloudflare before deploying:
+
+```bash
+px wrangler login
+```
+
+This opens a browser window to authorize Wrangler with your Cloudflare account.
+
+## Custom Domains
+
+To configure a custom domain:
+
+1. Navigate to your Cloudflare Pages project dashboard
+2. Go to **Custom domains** section
+3. Click **Set up a custom domain**
+4. Enter your domain (e.g., `ta93abe.com`)
+5. Follow DNS configuration instructions
+
+The project is configured with `site: "https://ta93abe.com"` in `astro.config.mjs`, which:
+- Sets the canonical URL for SEO
+- Generates correct sitemap URLs
+- Ensures proper asset paths
+
+### DNS Configuration
+
+For apex domain (`ta93abe.com`):
+- Add a CNAME record pointing to your Pages deployment URL
+- Or use Cloudflare's CNAME flattening for apex domains
+
+For www subdomain:
+- Add a CNAME record: `www` → `ta93abe.com`
+
+## Preview Deployments
+
+Cloudflare Pages automatically creates preview deployments for:
+
+- **Pull requests**: Each PR gets a unique preview URL
+- **Branch deployments**: Specific branches can have dedicated preview URLs
+
+### Creating a Preview Deployment
+
+```bash
+# Deploy to a preview environment
+px wrangler deploy --env preview
+```
+
+Preview URLs follow the pattern:
+```
+https://<branch>.<project>.pages.dev
+```
+
+### Preview Benefits
+
+- Test changes before merging to production
+- Share work-in-progress with stakeholders
+- Automatic SSL certificates
+- Same performance as production
+
+## Deployment Workflow
+
+### Typical Deployment Process
+
+1. **Local Development**
+   ```bash
+   pnpm dev
+   ```
+
+2. **Test Production Build**
+   ```bash
+   pnpm build
+   pnpm preview
+   ```
+
+3. **Deploy to Production**
+   ```bash
+   pnpm deploy
+   ```
+
+### CI/CD Integration
+
+For automated deployments, you can integrate Wrangler in your CI pipeline:
+
+```yaml
+# Example GitHub Actions workflow
+- name: Deploy to Cloudflare Pages
+  run: pnpm deploy
+  env:
+    CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+```
+
+## Monitoring and Analytics
+
+With `observability: true` enabled:
+
+- View request analytics in Cloudflare dashboard
+- Monitor performance metrics
+- Track visitor geography and device types
+- Analyze cache hit rates
+
+## Rollback
+
+To rollback to a previous deployment:
+
+1. Visit your Cloudflare Pages dashboard
+2. Navigate to **Deployments** tab
+3. Find the desired deployment
+4. Click **Rollback to this deployment**
+
+## Troubleshooting
+
+### Build Failures
+
+If deployment fails during build:
+
+1. Run `pnpm build` locally to reproduce
+2. Check for TypeScript errors
+3. Ensure all dependencies are installed
+4. Verify Node.js version compatibility
+
+### 404 Errors
+
+If pages show 404 errors:
+
+1. Check `wrangler.jsonc` has `"not_found_handling": "404-page"`
+2. Ensure custom 404 page exists in your Astro project
+3. Verify routing configuration in `astro.config.mjs`
+
+### Cache Issues
+
+If updates aren't appearing:
+
+1. Purge Cloudflare cache in the dashboard
+2. Check browser cache (hard refresh with Ctrl+Shift+R)
+3. Verify the deployment completed successfully
+
+## Best Practices
+
+- Always test builds locally with `pnpm build && pnpm preview`
+- Use preview deployments for testing major changes
+- Monitor deployment logs for warnings or errors
+- Keep Wrangler updated: `pnpm update wrangler`
+- Enable branch deployments for feature development

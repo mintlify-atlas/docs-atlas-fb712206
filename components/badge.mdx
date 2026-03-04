@@ -1,0 +1,128 @@
+---
+title: Badge
+description: A status badge component for displaying book reading status
+---
+
+The Badge component displays status labels with color-coded styling. Currently configured for book reading status (読了/読書中/積読) but can be extended for other use cases.
+
+## Props
+
+<ParamField path="variant" type="'read' | 'reading' | 'stacked'" default="reading">
+  The status variant to display.
+  - `read`: 読了 (Finished reading) - Green styling
+  - `reading`: 読書中 (Currently reading) - Blue styling
+  - `stacked`: 積読 (To be read) - Amber styling
+</ParamField>
+
+<ParamField path="class" type="string">
+  Additional CSS classes to apply to the badge.
+</ParamField>
+
+## Variants
+
+Each variant displays a Japanese label with corresponding color scheme:
+
+### Read (読了)
+
+Indicates a finished book.
+
+```astro
+<Badge variant="read" />
+```
+
+Displays: 読了 with emerald background and text (src/utils/books.ts:8)
+
+### Reading (読書中)
+
+Indicates currently reading.
+
+```astro
+<Badge variant="reading" />
+```
+
+Displays: 読書中 with blue background and text (src/utils/books.ts:9)
+
+### Stacked (積読)
+
+Indicates books in the reading queue.
+
+```astro
+<Badge variant="stacked" />
+```
+
+Displays: 積読 with amber background and text (src/utils/books.ts:10)
+
+## Usage Examples
+
+### Basic Usage
+
+```astro
+import Badge from "@/components/ui/Badge.astro";
+
+<Badge variant="reading" />
+```
+
+### In a Book List
+
+```astro
+<div class="book-item">
+  <h3>Design Patterns</h3>
+  <Badge variant="read" />
+</div>
+
+<div class="book-item">
+  <h3>Clean Code</h3>
+  <Badge variant="reading" />
+</div>
+
+<div class="book-item">
+  <h3>Refactoring</h3>
+  <Badge variant="stacked" />
+</div>
+```
+
+### With Custom Styling
+
+```astro
+<Badge variant="read" class="ml-2" />
+```
+
+## Styling
+
+The badge uses a consistent design with:
+- **Rounded**: Full rounded borders for pill shape (src/components/ui/Badge.astro:14)
+- **Padding**: 12px horizontal, 4px vertical (src/components/ui/Badge.astro:14)
+- **Typography**: Extra small font size with semibold weight (src/components/ui/Badge.astro:14)
+- **Color-coded**: Each variant has distinct background and text colors (src/utils/books.ts:8-10)
+
+## Status Configuration
+
+Status labels and styles are defined in `src/utils/books.ts`:
+
+```typescript
+export const statusLabels = {
+  read: "読了",
+  reading: "読書中",
+  stacked: "積読",
+};
+
+export const statusStyles = {
+  read: "bg-emerald-100 text-emerald-800",
+  reading: "bg-blue-100 text-blue-800",
+  stacked: "bg-amber-100 text-amber-800",
+};
+```
+
+## Extending the Component
+
+To add new badge variants:
+
+1. Add the label to `statusLabels` in `src/utils/books.ts`
+2. Add corresponding styles to `statusStyles`
+3. Update the `variant` type in the Props interface (src/components/ui/Badge.astro:5)
+
+## Implementation Details
+
+- **Compact design**: Uses `xs` font size for minimal space usage
+- **Semantic**: Uses `<span>` element as an inline status indicator
+- **Utility-based**: Leverages imported utilities for consistency across the app

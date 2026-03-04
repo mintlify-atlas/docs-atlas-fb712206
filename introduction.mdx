@@ -1,0 +1,268 @@
+---
+title: Introduction
+description: Build a modern portfolio and blog site with Astro, TypeScript, and comprehensive content management
+mode: custom
+---
+
+<div className="relative overflow-hidden py-20 bg-gradient-to-br from-[#2563eb] via-[#1e40af] to-[#1e3a8a] dark:from-[#1e40af] dark:via-[#1e3a8a] dark:to-[#0f172a]">
+  <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
+      <div className="lg:col-span-7">
+        <div className="mb-4">
+          <span className="inline-block text-sm font-medium text-blue-200 uppercase tracking-wide">
+            Documentation
+          </span>
+        </div>
+        
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+          ta93abe Portfolio Documentation
+        </h1>
+        
+        <p className="text-xl text-blue-100 max-w-2xl mb-8">
+          Build a high-performance personal portfolio and blog with Astro. Features content collections, MDX support, RSS aggregation, and automatic OG image generation.
+        </p>
+        
+        <div className="flex flex-wrap gap-4">
+          <a
+            href="/quickstart"
+            className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-[#2563eb] bg-white rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            Get Started
+          </a>
+          <a
+            href="/features/content-collections"
+            className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white border border-white/30 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+          >
+            Explore Features
+          </a>
+        </div>
+      </div>
+      
+      <div className="hidden lg:block lg:col-span-5">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2563eb] to-transparent blur-3xl opacity-30"></div>
+          <div className="relative bg-[#1a1d27] dark:bg-[#0f1117] rounded-2xl p-6 border border-white/10">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            </div>
+            <pre className="text-sm text-gray-300">
+              <code>{`// Create a blog post
+---
+title: "Getting Started"
+date: 2026-03-04
+excerpt: "Build your portfolio"
+tags: ["astro", "typescript"]
+---
+
+# Welcome!
+
+Start building your site...`}</code>
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Quick start
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Get your portfolio site running in minutes
+  </p>
+
+  <Steps>
+    <Step title="Clone the repository">
+      Clone the project to your local machine:
+      
+      ```bash
+      git clone https://github.com/ta93abe/me.git
+      cd me
+      ```
+    </Step>
+    
+    <Step title="Install dependencies">
+      Install the required packages using pnpm:
+      
+      ```bash
+      pnpm install
+      ```
+      
+      <Note>This project uses pnpm as the package manager. Make sure you have it installed globally.</Note>
+    </Step>
+    
+    <Step title="Start the development server">
+      Launch the local development server:
+      
+      ```bash
+      pnpm dev
+      ```
+      
+      Your site will be available at `http://localhost:4321`
+    </Step>
+    
+    <Step title="Create your first content">
+      Add a new blog post in `src/content/blog/`:
+      
+      ```md
+      ---
+      title: "My First Post"
+      date: 2026-03-04
+      excerpt: "This is my first blog post"
+      tags: ["intro"]
+      ---
+
+      # Hello World!
+
+      This is my first post using Astro.
+      ```
+    </Step>
+  </Steps>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Key features
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Everything you need to build a professional portfolio and blog
+  </p>
+
+  <CardGroup cols={2}>
+    <Card
+      title="Content Collections"
+      icon="folder-open"
+      href="/features/content-collections"
+    >
+      Organize blog posts, portfolio works, books, and talks with type-safe content collections
+    </Card>
+    
+    <Card
+      title="MDX Support"
+      icon="file-code"
+      href="/features/blog-system"
+    >
+      Write rich content with MDX components, code blocks, and interactive elements
+    </Card>
+    
+    <Card
+      title="RSS Aggregation"
+      icon="rss"
+      href="/features/external-content"
+    >
+      Automatically pull content from Zenn, Note, and Podcast RSS feeds
+    </Card>
+    
+    <Card
+      title="OG Images"
+      icon="image"
+      href="/guides/og-image-generation"
+    >
+      Generate beautiful Open Graph images automatically with Satori
+    </Card>
+    
+    <Card
+      title="Full-text Search"
+      icon="magnifying-glass"
+      href="/features/blog-system"
+    >
+      Built-in search powered by Pagefind for fast client-side search
+    </Card>
+    
+    <Card
+      title="Performance Optimized"
+      icon="bolt"
+      href="/deployment/cloudflare-pages"
+    >
+      Deploy to Cloudflare Pages with optimized static site generation
+    </Card>
+  </CardGroup>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Technology stack
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Built with modern web technologies
+  </p>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="rounded-2xl border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6 hover:border-[#2563eb] dark:hover:border-[#2563eb] transition-colors">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-lg bg-[#2563eb]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#2563eb]" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Astro</h3>
+      </div>
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        Fast static site generator with partial hydration and minimal JavaScript
+      </p>
+    </div>
+
+    <div className="rounded-2xl border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6 hover:border-[#2563eb] dark:hover:border-[#2563eb] transition-colors">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-lg bg-[#2563eb]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#2563eb]" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M0 12v12h24V0H0v12zm19.341-.956c.61.152 1.074.423 1.501.865.221.236.549.666.575.77.008.03-1.036.73-1.668 1.123-.023.015-.115-.084-.217-.236-.31-.45-.633-.644-1.128-.678-.728-.05-1.196.331-1.192.967a.88.88 0 00.102.45c.16.331.458.53 1.39.934 1.719.744 2.454 1.235 2.911 1.946.51.794.592 2.064.166 3.072-.475 1.123-1.662 1.856-3.395 2.091-.582.08-1.956.053-2.575-.053-1.033-.178-2.012-.65-2.71-1.308-.397-.374-.792-.944-.792-1.145 0-.059.064-.11.513-.41.297-.2.557-.358.578-.352.02.007.125.138.232.293.445.645.98.954 1.684 1.018.977.09 1.603-.413 1.603-1.29 0-.296-.043-.426-.187-.628-.17-.24-.516-.43-1.588-.872-1.633-.674-2.331-1.093-2.869-1.723-.58-.675-.818-1.454-.724-2.373.123-1.214.867-2.046 2.173-2.438.631-.189 1.664-.216 2.339-.06z"/>
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">TypeScript</h3>
+      </div>
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        Type-safe development with full TypeScript support
+      </p>
+    </div>
+
+    <div className="rounded-2xl border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6 hover:border-[#2563eb] dark:hover:border-[#2563eb] transition-colors">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-lg bg-[#2563eb]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#2563eb]" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z"/>
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Tailwind CSS</h3>
+      </div>
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        Utility-first CSS framework for rapid UI development
+      </p>
+    </div>
+
+    <div className="rounded-2xl border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6 hover:border-[#2563eb] dark:hover:border-[#2563eb] transition-colors">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-lg bg-[#2563eb]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#2563eb]" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M11.5 0L0 12.5 11.5 25l8-8-8-8 4.5-4.5L11.5 0z"/>
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Cloudflare Pages</h3>
+      </div>
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        Global CDN deployment with edge computing capabilities
+      </p>
+    </div>
+  </div>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <div className="rounded-2xl border border-gray-200 dark:border-[#27272a] bg-gradient-to-br from-white to-gray-50 dark:from-[#1a1d27] dark:to-[#0f1117] p-8 text-center">
+    <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
+      Ready to build your portfolio?
+    </h2>
+    <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
+      Follow the quickstart guide to set up your development environment and create your first content.
+    </p>
+    <a
+      href="/quickstart"
+      className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-[#2563eb] rounded-lg hover:bg-[#1e40af] transition-colors"
+    >
+      Get Started →
+    </a>
+  </div>
+</div>

@@ -1,0 +1,310 @@
+---
+title: Adding Portfolio Works
+description: Learn how to add and showcase your projects in the portfolio section
+---
+
+## Overview
+
+Portfolio works showcase your projects, code repositories, and professional accomplishments. Each work is a `.mdx` or `.md` file in the `src/content/works/` directory with a cover image and detailed description.
+
+## Quick Start
+
+1. Create a new `.mdx` file in `src/content/works/`
+2. Add frontmatter with required fields
+3. Add a cover image to `public/`
+4. Write your project description
+5. The work appears in your portfolio automatically
+
+## File Naming
+
+Use descriptive names that match your project:
+
+```
+src/content/works/dbt-jobs.mdx           → /works/dbt-jobs/
+src/content/works/portfolio-site.mdx     → /works/portfolio-site/
+src/content/works/api-client.mdx         → /works/api-client/
+```
+
+The file name becomes the URL slug.
+
+## Frontmatter Schema
+
+The works schema is defined in `src/content.config.ts:20-29`. All fields are required.
+
+### Required Fields
+
+<ParamField path="title" type="string" required>
+  The project name or title
+</ParamField>
+
+<ParamField path="coverImage" type="image" required>
+  Path to the cover image. Use relative paths from `public/` directory.
+  
+  Example: `"../../../public/dbt-jobs.png"`
+</ParamField>
+
+<ParamField path="tags" type="string[]" required>
+  Technologies, frameworks, or categories. Non-optional for works.
+  
+  Example: `["GitHub Actions", "dbt", "CI/CD", "Snowflake"]`
+</ParamField>
+
+<ParamField path="excerpt" type="string" required>
+  A concise description of the project (1-2 sentences). Appears in portfolio listings.
+</ParamField>
+
+## Example: Complete Work Entry
+
+Here's a real example from the codebase (`src/content/works/dbt-jobs.mdx:1-38`):
+
+```mdx
+---
+title: "dbt-jobs"
+coverImage: "../../../public/dbt-jobs.png"
+tags: ["GitHub Actions", "dbt", "CI/CD", "Snowflake"]
+excerpt: "dbt の CI/CD パイプラインを GitHub Actions で実行するための composite action。"
+---
+
+import OgpCard from "../../components/blog/OgpCard.astro";
+
+<OgpCard url="https://github.com/ta93abe/dbt-jobs" />
+
+GitHub Actions の composite action で、dbt プロジェクトの CI/CD パイプラインを構築します。現在は Snowflake アダプターに対応しており、アダプターの追加が容易な設計です。
+
+## 主な機能
+
+- **3つのジョブタイプ**: `ci`（PR チェック）、`merge`（マージ後ビルド）、`deploy`（本番デプロイ）を用途に応じて使い分け
+- **Slim CI 対応**: 本番マニフェストとの差分ビルド（`state:modified+`）でCI実行時間を短縮
+- **PR コメント**: ビルド結果を自動で PR にコメントとして投稿
+- **バージョン自動解決**: `pyproject.toml`、`requirements.txt` などから dbt-core バージョンを自動検出
+- **フラグ自動注入**: `--profiles-dir` や `--defer --state` などのフラグをコマンドに自動付与
+
+## 使い方
+
+```yaml
+- uses: ta93abe/dbt-jobs@v1
+  with:
+    type: ci
+    adapter: snowflake
+    command: |
+      dbt build --select state:modified+
+    deferral: main
+    post-pr-comment: true
+```
+
+## 技術的なポイント
+
+各ジョブタイプで異なるシェルオプションを採用しています。`ci` では `set +e` で全てのコマンドを実行してから結果を集約し、`merge`/`deploy` では `set -e` で即座に失敗を検知します。マニフェストのアーティファクト管理と組み合わせることで、堅牢な dbt CI/CD を少ない設定で実現します。
+```
+
+## Cover Images
+
+### Image Location
+
+Store cover images in the `public/` directory:
+
+```
+public/
+  ├── dbt-jobs.png
+  ├── portfolio-site.jpg
+  └── api-client.png
+```
+
+### Image Path in Frontmatter
+
+Reference images using a relative path from the content file:
+
+```yaml
+# From src/content/works/my-project.mdx
+coverImage: "../../../public/my-image.png"
+```
+
+This path goes:
+- Up to `src/content/`
+- Up to `src/`  
+- Up to project root
+- Into `public/`
+
+### Image Requirements
+
+- **Format**: PNG, JPG, or WebP
+- **Dimensions**: Recommended 1200×630px (Open Graph standard)
+- **File size**: Keep under 500KB for performance
+- **Naming**: Use lowercase with hyphens (e.g., `my-project.png`)
+
+## Writing Project Descriptions
+
+### Structure
+
+A typical work description includes:
+
+1. **Introduction** - What the project does (1-2 paragraphs)
+2. **Key Features** - Bullet points of main capabilities
+3. **Usage Example** - Code snippet or demo (if applicable)
+4. **Technical Details** - Implementation notes, architecture
+5. **Links** - Repository, demo, documentation
+
+### Using MDX Components
+
+You can enhance work descriptions with components:
+
+#### OgpCard for Repositories
+
+```mdx
+import OgpCard from "../../components/blog/OgpCard.astro";
+
+<OgpCard url="https://github.com/username/repo" />
+```
+
+This displays a rich preview of the GitHub repository.
+
+#### Callout for Important Notes
+
+```mdx
+import Callout from "../../components/blog/Callout.astro";
+
+<Callout type="tip" title="Try it out">
+  Check out the live demo at example.com
+</Callout>
+```
+
+#### LinkCard for External Resources
+
+```mdx
+import LinkCard from "../../components/blog/LinkCard.astro";
+
+<LinkCard
+  href="https://example.com/docs"
+  title="Full Documentation"
+  description="Complete API reference and examples"
+/>
+```
+
+## Code Examples
+
+Showcase your project with code snippets:
+
+````mdx
+## Installation
+
+```bash
+npm install my-package
+```
+
+## Usage
+
+```typescript
+import { MyClass } from 'my-package';
+
+const instance = new MyClass({
+  option: 'value'
+});
+
+await instance.run();
+```
+````
+
+## Organizing Works
+
+### Using Tags Effectively
+
+Tags help visitors filter and find relevant projects:
+
+**Technology tags:**
+```yaml
+tags: ["TypeScript", "React", "Node.js"]
+```
+
+**Category tags:**
+```yaml
+tags: ["Web App", "CLI Tool", "Library"]
+```
+
+**Domain tags:**
+```yaml
+tags: ["Data Engineering", "DevOps", "API"]
+```
+
+**Best practices:**
+
+- Be consistent with tag names across works
+- Include both technologies and categories
+- Limit to 3-6 tags per work
+- Use title case for readability
+
+### Writing Excerpts
+
+Excerpts appear in portfolio grid views. Make them count:
+
+**Good excerpt:**
+```yaml
+excerpt: "A GitHub Action for automating dbt CI/CD pipelines with Slim CI support and automated PR comments."
+```
+
+**Too vague:**
+```yaml
+excerpt: "A tool for dbt."
+```
+
+**Too long:**
+```yaml
+excerpt: "This is a comprehensive GitHub Actions composite action that provides a complete solution for running dbt projects in CI/CD pipelines with support for multiple adapters and advanced features like Slim CI."
+```
+
+## Publishing Workflow
+
+1. **Create the file**
+   ```bash
+   touch src/content/works/my-project.mdx
+   ```
+
+2. **Add cover image**
+   ```bash
+   cp my-project-cover.png public/
+   ```
+
+3. **Write frontmatter**
+   ```yaml
+   ---
+   title: "My Project"
+   coverImage: "../../../public/my-project-cover.png"
+   tags: ["TypeScript", "React"]
+   excerpt: "A brief description of my project."
+   ---
+   ```
+
+4. **Add content**
+   - Project description
+   - Features
+   - Code examples
+   - Links
+
+5. **Preview locally**
+   ```bash
+   npm run dev
+   ```
+   Visit `http://localhost:4321/works/my-project`
+
+6. **Deploy**
+   - Commit and push
+   - Automatic deployment via CI/CD
+
+## Tips
+
+<Callout type="tip" title="Show, Don't Just Tell">
+  Include screenshots, GIFs, or code examples to demonstrate your work.
+</Callout>
+
+<Callout type="info">
+  Works are sorted by file modification time by default. Name files in a way that makes sense for your organization.
+</Callout>
+
+<Callout type="warning">
+  Make sure cover images are optimized for web. Large images can slow down your portfolio page.
+</Callout>
+
+## Related Resources
+
+- [Portfolio Works Feature](/features/portfolio-works)
+- [OgpCard Component](/components/og-card)
+- [Content Collections](/features/content-collections)

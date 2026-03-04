@@ -1,0 +1,508 @@
+---
+title: Testing
+description: Testing setup, strategies, and examples for the ta93abe portfolio
+---
+
+# Testing
+
+The ta93abe portfolio uses a comprehensive testing setup with Vitest for unit tests and Playwright for end-to-end tests.
+
+## Testing Stack
+
+### Dependencies
+
+```json
+{
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@vitest/ui": "^4.0.18",
+    "happy-dom": "^20.6.1",
+    "vitest": "^4.0.18"
+  }
+}
+```
+
+### Test Scripts
+
+**`package.json`:**
+```json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
+  }
+}
+```
+
+## Unit Testing with Vitest
+
+### Configuration
+
+**`vitest.config.ts`:**
+```typescript
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: "happy-dom",
+    include: ["**/*.test.ts", "**/*.spec.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      exclude: [
+        "node_modules/",
+        "dist/",
+        ".astro/",
+        "**/*.config.*",
+        "**/*.d.ts",
+      ],
+    },
+  },
+});
+```
+
+### Test Location
+
+Unit tests are located in `src/__tests__/`:
+
+```
+src/__tests__/
+├── rss-loader.test.ts
+└── utils/
+    ├── books.test.ts
+    ├── date.test.ts
+    ├── ens.test.ts
+    ├── reading-time.test.ts
+    └── schema.test.ts
+```
+
+### Example: Date Utility Tests
+
+**`src/__tests__/utils/date.test.ts`:**
+```typescript
+import { describe, expect, it } from "vitest";
+import { formatDate } from "../../utils/date";
+
+describe("formatDate", () => {
+  it("should format Date object to Japanese format", () => {
+    const date = new Date("2024-01-15");
+    const result = formatDate(date);
+    expect(result).toBe("2024年1月15日");
+  });
+
+  it("should format string date to Japanese format", () => {
+    const result = formatDate("2024-12-25");
+    expect(result).toBe("2024年12月25日");
+  });
+
+  it("should accept custom format options", () => {
+    const date = new Date("2024-06-01");
+    const result = formatDate(date, {
+      year: "numeric",
+      month: "short",
+    });
+    expect(result).toBe("2024年6月");
+  });
+
+  it("should handle edge case dates", () => {
+    // First day of year
+    expect(formatDate(new Date("2024-01-01"))).toBe("2024年1月1日");
+    // Last day of year
+    expect(formatDate(new Date("2024-12-31"))).toBe("2024年12月31日");
+  });
+});
+```
+
+### Test Structure
+
+**Import statements:**
+```typescript
+import { describe, expect, it } from "vitest";
+import { functionToTest } from "../../utils/module";
+```
+
+**Test organization:**
+```typescript
+describe("functionName", () => {
+  it("should do something", () => {
+    // Arrange
+    const input = "test";
+    
+    // Act
+    const result = functionToTest(input);
+    
+    // Assert
+    expect(result).toBe("expected");
+  });
+});
+```
+
+### Running Unit Tests
+
+**Watch mode (development):**
+```bash
+pnpm test
+```
+
+**Single run:**
+```bash
+pnpm test:run
+```
+
+**With UI:**
+```bash
+pnpm test:ui
+```
+
+**With coverage:**
+```bash
+pnpm test:coverage
+```
+
+### Coverage Reports
+
+Coverage is generated in three formats:
+- **Text** - Console output
+- **JSON** - Machine-readable format
+- **HTML** - Interactive browser report
+
+**Excluded from coverage:**
+- `node_modules/`
+- `dist/`
+- `.astro/`
+- Config files (`*.config.*`)
+- Type definitions (`*.d.ts`)
+
+## E2E Testing with Playwright
+
+### Configuration
+
+**`playwright.config.ts`:**
+```typescript
+import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./tests",
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: "html",
+  use: {
+    baseURL: "http://localhost:4321",
+    trace: "on-first-retry",
+  },
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
+  ],
+  webServer: {
+    command: "pnpm dev",
+    url: "http://localhost:4321",
+    reuseExistingServer: !process.env.CI,
+  },
+});
+```
+
+### Test Location
+
+E2E tests are located in `tests/`:
+
+```
+tests/
+└── links.spec.ts
+```
+
+### Example: Links Page Tests
+
+**`tests/links.spec.ts`:**
+```typescript
+import { expect, test } from "@playwright/test";
+
+test.describe("Links Page", () => {
+  test("should have correct title and heading", async ({ page }) => {
+    await page.goto("/links");
+
+    await expect(page).toHaveTitle(/Links/);
+    await expect(page.locator("h1").first()).toContainText("Links");
+  });
+
+  test("should display page description", async ({ page }) => {
+    await page.goto("/links");
+
+    await expect(
+      page.locator("p").filter({ hasText: "SNS・ソーシャルメディア" }),
+    ).toBeVisible();
+  });
+
+  test("should display SNS links", async ({ page }) => {
+    await page.goto("/links");
+
+    // GitHubリンクが存在することを確認
+    await expect(
+      page.locator('a[href*="github.com"]').first(),
+    ).toBeVisible();
+  });
+
+  test("should have external links with correct attributes", async ({
+    page,
+  }) => {
+    await page.goto("/links");
+
+    // 外部リンクが存在することを確認
+    const externalLinks = page.locator('a[href^="https://"]');
+    await expect(externalLinks.first()).toBeVisible();
+  });
+});
+```
+
+### Test Patterns
+
+**Navigation:**
+```typescript
+await page.goto("/path");
+```
+
+**Assertions:**
+```typescript
+// Page title
+await expect(page).toHaveTitle(/Title/);
+
+// Element visibility
+await expect(page.locator("h1")).toBeVisible();
+
+// Text content
+await expect(page.locator("h1")).toContainText("Text");
+
+// Element count
+await expect(page.locator(".card")).toHaveCount(5);
+```
+
+**Selectors:**
+```typescript
+// CSS selector
+page.locator(".class-name")
+
+// Text filter
+page.locator("p").filter({ hasText: "specific text" })
+
+// Attribute selector
+page.locator('a[href*="github.com"]')
+
+// First/last
+page.locator("button").first()
+page.locator("button").last()
+```
+
+### Running E2E Tests
+
+**Run all tests:**
+```bash
+pnpm test:e2e
+```
+
+**Run with UI mode:**
+```bash
+pnpm test:e2e:ui
+```
+
+**View last report:**
+```bash
+pnpm test:e2e:report
+```
+
+**Run specific browser:**
+```bash
+pnpm playwright test --project=chromium
+```
+
+**Run specific test file:**
+```bash
+pnpm playwright test tests/links.spec.ts
+```
+
+### Browser Configuration
+
+Tests run on three browsers:
+- **Chromium** - Chrome/Edge
+- **Firefox** - Firefox
+- **WebKit** - Safari
+
+### CI Configuration
+
+In CI environments:
+- Tests retry up to 2 times on failure
+- Single worker (no parallelization)
+- Fails if `test.only` is found
+- Doesn't reuse existing dev server
+
+## Test Organization
+
+### Unit Test Structure
+
+```typescript
+// src/__tests__/utils/example.test.ts
+import { describe, expect, it } from "vitest";
+import { example } from "../../utils/example";
+
+describe("Module Name", () => {
+  describe("functionName", () => {
+    it("should handle normal case", () => {
+      expect(example("input")).toBe("output");
+    });
+    
+    it("should handle edge case", () => {
+      expect(example("")).toBe("");
+    });
+    
+    it("should throw on invalid input", () => {
+      expect(() => example(null)).toThrow();
+    });
+  });
+});
+```
+
+### E2E Test Structure
+
+```typescript
+// tests/feature.spec.ts
+import { expect, test } from "@playwright/test";
+
+test.describe("Feature Name", () => {
+  test("should do something", async ({ page }) => {
+    await page.goto("/path");
+    await expect(page.locator(".element")).toBeVisible();
+  });
+  
+  test("should handle interaction", async ({ page }) => {
+    await page.goto("/path");
+    await page.click("button");
+    await expect(page.locator(".result")).toContainText("Success");
+  });
+});
+```
+
+## Testing Utilities
+
+### Happy DOM
+
+Vitest uses `happy-dom` for DOM environment:
+
+```typescript
+export default defineConfig({
+  test: {
+    environment: "happy-dom",
+  },
+});
+```
+
+Provides:
+- Lightweight DOM implementation
+- Fast execution
+- Web APIs (localStorage, fetch, etc.)
+
+## Best Practices
+
+### Unit Tests
+
+1. **Test Pure Functions** - Focus on utility functions
+2. **Use Descriptive Names** - Clear "should" statements
+3. **Arrange-Act-Assert** - Follow AAA pattern
+4. **Test Edge Cases** - Empty strings, null, undefined
+5. **Mock External Dependencies** - Isolate units
+
+### E2E Tests
+
+1. **Test User Flows** - Real user interactions
+2. **Use Semantic Selectors** - Prefer text/role over CSS
+3. **Wait for Elements** - Use Playwright's auto-waiting
+4. **Test Across Browsers** - All three projects
+5. **Keep Tests Independent** - No test dependencies
+
+### General
+
+1. **Write Tests First** - TDD when possible
+2. **Keep Tests Fast** - Quick feedback loop
+3. **Maintain Tests** - Update with code changes
+4. **Use CI** - Run tests automatically
+5. **Monitor Coverage** - Aim for high coverage
+
+## Debugging
+
+### Vitest Debugging
+
+```bash
+# Run specific test
+pnpm vitest date.test.ts
+
+# Run in watch mode
+pnpm test
+
+# View in UI
+pnpm test:ui
+```
+
+### Playwright Debugging
+
+```bash
+# Debug mode
+pnpm playwright test --debug
+
+# UI mode
+pnpm test:e2e:ui
+
+# Headed mode (see browser)
+pnpm playwright test --headed
+
+# Slow motion
+pnpm playwright test --slow-mo=1000
+```
+
+### Trace Viewer
+
+Playwright captures traces on first retry:
+
+```bash
+pnpm playwright show-trace trace.zip
+```
+
+## Continuous Integration
+
+Tests run automatically in CI:
+
+```yaml
+# .github/workflows/test.yml (example)
+name: Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: pnpm install
+      - run: pnpm test:run
+      - run: pnpm test:e2e
+```
+
+## Next Steps
+
+- [Component Architecture →](/development/components)
+- [Styling Guide →](/development/styling)
+- [Project Structure →](/development/project-structure)

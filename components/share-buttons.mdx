@@ -1,0 +1,166 @@
+---
+title: Share Buttons
+description: Add social sharing functionality to blog posts
+---
+
+The ShareButtons component provides an easy way for readers to share blog posts on social media platforms, with built-in support for X (Twitter), Bluesky, LINE, and URL copying.
+
+## Usage
+
+```mdx
+import ShareButtons from "@/components/blog/ShareButtons.astro";
+
+<ShareButtons
+  url="https://ta93abe.dev/blog/my-post"
+  title="My Awesome Blog Post"
+/>
+```
+
+## Props
+
+<ParamField path="url" type="string" required>
+  The full URL of the page to be shared. Should include protocol (https://).
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  The title of the page/post to be shared. Will be included in share text.
+</ParamField>
+
+<ParamField path="class" type="string">
+  Additional CSS classes to apply to the container element.
+</ParamField>
+
+## Supported Platforms
+
+### X (Twitter)
+
+Shares with the post title and URL:
+```
+https://twitter.com/intent/tweet?url={url}&text={title}
+```
+
+### Bluesky
+
+Opens the compose dialog with title and URL:
+```
+https://bsky.app/intent/compose?text={title}%20{url}
+```
+
+### LINE
+
+Shares via LINE's social plugin:
+```
+https://social-plugins.line.me/lineit/share?url={url}
+```
+
+### Copy URL
+
+Provides a button to copy the URL to clipboard with visual feedback:
+- Copies URL using the Clipboard API
+- Shows "コピー済み" (Copied) confirmation
+- Reverts back to "コピー" (Copy) after 2 seconds
+
+## Features
+
+### Responsive Design
+
+- **Desktop**: Shows platform name next to icon
+- **Mobile**: Shows only icons to save space
+- Platform names hidden on small screens using `sm:inline`
+
+### Accessibility
+
+- Proper `aria-label` attributes via `title` prop
+- External link attributes (`target="_blank"` and `rel="noopener noreferrer"`)
+- Semantic button element for copy functionality
+
+### User Experience
+
+- Rounded pill-style buttons
+- Hover state with background color change
+- Smooth transitions
+- Clear visual feedback for copy action
+- Responsive gap spacing using flexbox
+
+## Customization
+
+### Custom Styling
+
+Add custom classes to the container:
+
+```mdx
+<ShareButtons
+  url={postUrl}
+  title={postTitle}
+  class="my-8 justify-center"
+/>
+```
+
+### Modifying Platforms
+
+To add or remove platforms, edit the `shareLinks` array in the component (`src/components/blog/ShareButtons.astro:13`):
+
+```typescript
+const shareLinks = [
+  {
+    name: "Platform Name",
+    href: `https://platform.com/share?url=${encodedUrl}`,
+    icon: `<svg>...</svg>`,
+    label: "Share on Platform",
+  },
+  // Add more platforms...
+];
+```
+
+### Icons
+
+The component uses inline SVG icons for:
+- X (formerly Twitter) logo
+- Bluesky butterfly logo
+- LINE logo
+- Link/chain icon for copy button
+
+All icons are sized to `size-5` (20x20px) for consistency.
+
+## Client-Side Behavior
+
+The copy URL functionality includes a small client-side script that:
+
+1. Listens for click events on the copy button
+2. Reads the URL from the `data-url` attribute
+3. Uses `navigator.clipboard.writeText()` to copy
+4. Updates button text for 2 seconds
+5. Resets to original text
+
+The script is scoped to the component and will work with multiple ShareButtons instances on the same page.
+
+## Example in Blog Layout
+
+Typically used in blog post layouts after the content:
+
+```astro
+---
+import ShareButtons from "@/components/blog/ShareButtons.astro";
+
+const { title, slug } = Astro.props;
+const postUrl = `${Astro.site}blog/${slug}`;
+---
+
+<article>
+  <slot />
+  
+  <footer class="mt-12 pt-8 border-t">
+    <ShareButtons url={postUrl} title={title} />
+  </footer>
+</article>
+```
+
+## Browser Compatibility
+
+The Clipboard API is supported in all modern browsers. For older browsers:
+- The copy button will fail silently
+- All social sharing buttons will continue to work
+
+## Source
+
+Location: `src/components/blog/ShareButtons.astro:2`

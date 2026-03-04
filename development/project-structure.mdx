@@ -1,0 +1,272 @@
+---
+title: Project Structure
+description: Understanding the ta93abe portfolio directory structure and organization
+---
+
+# Project Structure
+
+The ta93abe portfolio follows a standard Astro project structure with TypeScript, organized for clarity and maintainability.
+
+## Root Directory
+
+```
+ta93abe/
+├── src/              # Source code
+├── public/           # Static assets
+├── tests/            # E2E tests
+├── docs/             # Documentation
+├── .github/          # GitHub workflows
+├── .vscode/          # Editor settings
+├── astro.config.mjs  # Astro configuration
+├── playwright.config.ts
+├── vitest.config.ts
+├── tsconfig.json
+├── package.json
+└── pnpm-lock.yaml
+```
+
+## Source Directory (`src/`)
+
+The main application code is organized into the following subdirectories:
+
+### Components (`src/components/`)
+
+Reusable Astro components organized by category:
+
+```
+src/components/
+├── ui/               # Generic UI components
+│   ├── Button.astro
+│   ├── Card.astro
+│   ├── Badge.astro
+│   ├── Input.astro
+│   ├── Select.astro
+│   ├── Tag.astro
+│   ├── Skeleton.astro
+│   ├── Spinner.astro
+│   ├── NavLink.astro
+│   ├── FilterChip.astro
+│   ├── CardSkeleton.astro
+│   ├── EmptyState.astro
+│   └── BackToTop.astro
+├── blog/             # Blog-specific components
+│   ├── Callout.astro
+│   ├── LinkCard.astro
+│   ├── OgpCard.astro
+│   └── ShareButtons.astro
+├── landing/          # Landing page sections
+│   ├── HeroSection.astro
+│   └── LinksSection.astro
+├── Header.astro      # Site header
+├── Footer.astro      # Site footer
+├── Logo.astro        # Site logo
+├── SnsLinks.astro    # Social media links
+├── Breadcrumb.astro  # Breadcrumb navigation
+├── FilterSort.astro  # Filter and sort UI
+├── PostNavigation.astro
+├── RelatedPosts.astro
+└── Skeleton.astro    # Content skeleton loader
+```
+
+### Layouts (`src/layouts/`)
+
+Page layout templates:
+
+```
+src/layouts/
+└── Layout.astro      # Base layout template
+```
+
+### Pages (`src/pages/`)
+
+File-based routing structure:
+
+```
+src/pages/
+├── index.astro       # Homepage
+├── blog/
+│   ├── index.astro   # Blog listing
+│   └── [id].astro    # Blog post detail
+├── bookshelf/
+│   ├── index.astro   # Bookshelf listing
+│   └── [id].astro    # Book detail
+├── links.astro       # Links page
+├── slides.astro      # Slides page
+├── 404.astro         # Not found page
+├── rss.xml.ts        # RSS feed
+└── og/               # OG image generation
+    └── blog/
+        └── [id].png.ts
+```
+
+### Content Collections (`src/content/`)
+
+Markdown/MDX content organized by type:
+
+```
+src/content/
+├── blog/             # Blog posts
+├── books/            # Book reviews
+├── talks/            # Conference talks
+└── works/            # Portfolio works
+```
+
+### Utilities (`src/utils/`)
+
+Helper functions and utilities:
+
+```
+src/utils/
+├── books.ts          # Book-related utilities
+├── content.ts        # Content collection helpers
+├── date.ts           # Date formatting
+├── ens.ts            # ENS resolution
+├── ogp.ts            # OGP metadata
+├── reading-time.ts   # Reading time calculation
+├── rss-loader.ts     # RSS feed loading
+├── schema.ts         # Content schemas
+└── og/
+    └── generate-og-image.ts
+```
+
+### Styles (`src/styles/`)
+
+Global styles and CSS:
+
+```
+src/styles/
+└── global.css        # Global styles with Tailwind
+```
+
+### Configuration (`src/config/`)
+
+Application configuration files:
+
+```
+src/config/
+└── [configuration files]
+```
+
+### Types (`src/types/`)
+
+TypeScript type definitions:
+
+```
+src/types/
+└── [type definitions]
+```
+
+### Scripts (`src/scripts/`)
+
+Client-side scripts:
+
+```
+src/scripts/
+└── [client scripts]
+```
+
+### Tests (`src/__tests__/`)
+
+Unit tests organized by module:
+
+```
+src/__tests__/
+├── rss-loader.test.ts
+└── utils/
+    ├── books.test.ts
+    ├── date.test.ts
+    ├── ens.test.ts
+    ├── reading-time.test.ts
+    └── schema.test.ts
+```
+
+## Public Directory (`public/`)
+
+Static assets served directly:
+
+```
+public/
+├── favicon.svg       # Site favicon
+├── og-image.png      # Default OG image
+├── robots.txt        # Robots configuration
+├── _headers          # HTTP headers (for deployment)
+└── dbt-jobs.png      # Static image assets
+```
+
+## Configuration Files
+
+### Astro Configuration
+
+**`astro.config.mjs`** - Astro build and integration settings:
+- Site URL configuration
+- MDX integration
+- Sitemap generation
+- Pagefind search integration
+- Tailwind CSS via Vite plugin
+- Markdown syntax highlighting
+
+### TypeScript Configuration
+
+**`tsconfig.json`** - TypeScript compiler settings
+
+### Testing Configuration
+
+**`vitest.config.ts`** - Unit test configuration
+**`playwright.config.ts`** - E2E test configuration
+
+### Code Quality
+
+**`biome.json`** - Biome linter and formatter settings
+**`.editorconfig`** - Editor consistency settings
+
+### Deployment
+
+**`wrangler.jsonc`** - Cloudflare Workers deployment
+**`pnpm-workspace.yaml`** - pnpm workspace configuration
+
+## Build Output
+
+Generated during build process:
+
+```
+dist/                 # Production build output
+.astro/               # Astro cache and temp files
+node_modules/         # Dependencies
+```
+
+## Key Design Patterns
+
+### Component Organization
+
+Components are organized by domain:
+- **`ui/`** - Reusable design system components
+- **`blog/`** - Blog-specific features
+- **`landing/`** - Landing page sections
+- Root level for layout components (Header, Footer)
+
+### Content-Driven
+
+Content is managed through Astro Content Collections:
+- Type-safe content with schemas
+- Markdown/MDX support
+- Organized by content type
+
+### Utility-First
+
+Utility functions are:
+- Pure and testable
+- Domain-specific (date, books, content)
+- Located in `src/utils/`
+
+### File-Based Routing
+
+Pages follow Astro's file-based routing:
+- `pages/index.astro` → `/`
+- `pages/blog/[id].astro` → `/blog/:id`
+- `pages/rss.xml.ts` → `/rss.xml`
+
+## Next Steps
+
+- [Learn about Components →](/development/components)
+- [Understand Styling →](/development/styling)
+- [Testing Guide →](/development/testing)

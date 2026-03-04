@@ -1,0 +1,282 @@
+---
+title: Adding Blog Posts
+description: Learn how to create and publish blog posts with MDX, frontmatter, and rich components
+---
+
+## Overview
+
+Blog posts are written in Markdown (`.md`) or MDX (`.mdx`) format and stored in the `src/content/blog/` directory. MDX files allow you to import and use Astro components within your content for rich, interactive blog posts.
+
+## Quick Start
+
+1. Create a new file in `src/content/blog/`
+2. Add frontmatter with required fields
+3. Write your content
+4. The post automatically appears on your blog
+
+## File Naming
+
+File names become the URL slug:
+
+```
+src/content/blog/first-post.md        → /blog/first-post/
+src/content/blog/mdx-demo.mdx         → /blog/mdx-demo/
+src/content/blog/my-new-article.mdx   → /blog/my-new-article/
+```
+
+Use lowercase, hyphens for spaces, and descriptive names.
+
+## Frontmatter Schema
+
+All blog posts require YAML frontmatter at the top of the file. Here's the schema defined in `src/content.config.ts:49-58`:
+
+### Required Fields
+
+<ParamField path="title" type="string" required>
+  The post title displayed in listings and at the top of the post
+</ParamField>
+
+<ParamField path="date" type="date" required>
+  Publication date in `YYYY-MM-DD` format. Used for sorting posts chronologically.
+</ParamField>
+
+<ParamField path="excerpt" type="string" required>
+  A short description of the post. Displayed in post listings and RSS feeds. Keep it concise (1-2 sentences).
+</ParamField>
+
+### Optional Fields
+
+<ParamField path="updatedDate" type="date">
+  Date when the post was last updated. Also in `YYYY-MM-DD` format.
+</ParamField>
+
+<ParamField path="tags" type="string[]">
+  Array of tags for categorizing posts. Example: `["Astro", "TypeScript", "Web Development"]`
+</ParamField>
+
+## Example: Basic Markdown Post
+
+Here's a minimal blog post in Markdown:
+
+```markdown
+---
+title: "Getting Started with Astro"
+date: 2024-01-15
+excerpt: "Learn the basics of building fast websites with Astro."
+tags: ["Astro", "Web Development"]
+---
+
+# Getting Started with Astro
+
+Astro is a modern static site generator that delivers lightning-fast performance.
+
+## Why Astro?
+
+- Zero JavaScript by default
+- Component islands architecture
+- Bring your own framework
+
+## Installation
+
+Get started with:
+
+```bash
+npm create astro@latest
+```
+
+That's it! You're ready to build.
+```
+
+## Example: MDX Post with Components
+
+MDX files can import and use Astro components for richer content:
+
+```mdx
+---
+title: "MDX Blog Features Demo"
+date: 2026-01-11
+excerpt: "Explore the powerful features available in MDX blog posts."
+tags: ["MDX", "Astro", "Blog"]
+---
+
+import Callout from "../../components/blog/Callout.astro";
+import LinkCard from "../../components/blog/LinkCard.astro";
+
+This blog supports MDX, which means you can use components!
+
+## Callouts
+
+<Callout type="info">
+  This is an informational callout. Great for tips and notes.
+</Callout>
+
+<Callout type="tip" title="Pro Tip">
+  Use callouts to highlight important information.
+</Callout>
+
+<Callout type="warning">
+  This warns readers about potential issues.
+</Callout>
+
+<Callout type="danger" title="Critical">
+  Use this for critical warnings and errors.
+</Callout>
+
+## Code Blocks
+
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+async function getUser(id: string): Promise<User> {
+  const response = await fetch(`/api/users/${id}`);
+  return response.json();
+}
+```
+
+## Link Cards
+
+<LinkCard
+  href="https://docs.astro.build"
+  title="Astro Documentation"
+  description="Learn everything about Astro framework"
+/>
+```
+
+## Available MDX Components
+
+The following components are available for use in your MDX blog posts:
+
+### Callout Component
+
+Highlight important information with different severity levels:
+
+- **info** - General information and tips
+- **tip** - Helpful suggestions and best practices  
+- **warning** - Cautions and things to watch out for
+- **danger** - Critical warnings and errors
+
+Import path: `../../components/blog/Callout.astro`
+
+### LinkCard Component
+
+Create beautiful preview cards for external links.
+
+Import path: `../../components/blog/LinkCard.astro`
+
+### OgpCard Component
+
+Display Open Graph preview cards for URLs.
+
+Import path: `../../components/blog/OgpCard.astro`
+
+See the [Blog Components](/components/callout) documentation for detailed usage.
+
+## Markdown Features
+
+All standard Markdown and GitHub Flavored Markdown (GFM) features are supported:
+
+- **Headings** - `#` through `######`
+- **Bold** and *italic* text
+- Links and images
+- Code blocks with syntax highlighting
+- Tables
+- Task lists
+- Blockquotes
+- Horizontal rules
+
+### Syntax Highlighting
+
+Code blocks automatically get syntax highlighting using Shiki. Specify the language:
+
+````markdown
+```typescript
+const greeting: string = "Hello, world!";
+```
+
+```python
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+```
+````
+
+### Tables
+
+```markdown
+| Feature | Status | Notes |
+|---------|:------:|-------|
+| Markdown | ✅ | Full support |
+| MDX | ✅ | Components enabled |
+| Syntax highlighting | ✅ | Using Shiki |
+```
+
+### Task Lists
+
+```markdown
+- [x] Setup blog
+- [x] Write first post
+- [ ] Add more content
+```
+
+## Content Organization
+
+### Using Tags
+
+Tags help readers find related content. Use consistent tag names:
+
+```yaml
+tags: ["Astro", "TypeScript", "Tutorial"]
+```
+
+**Best practices:**
+
+- Use title case for tag names
+- Keep tags general enough to be reused
+- Limit to 3-5 tags per post
+- Create a mental list of standard tags
+
+### Writing Excerpts
+
+The excerpt appears in:
+
+- Blog post listings
+- RSS feeds  
+- Social media previews
+
+**Tips for good excerpts:**
+
+- Keep it to 1-2 sentences
+- Summarize the key point or benefit
+- Make it compelling to encourage clicks
+- Avoid ending with punctuation other than periods
+
+## Publishing Workflow
+
+1. **Create the file** - Add `my-post.mdx` to `src/content/blog/`
+2. **Add frontmatter** - Include all required fields
+3. **Write content** - Use Markdown, MDX components, or both
+4. **Preview locally** - Run `npm run dev` to see your post
+5. **Commit and push** - The post goes live on deployment
+
+No build step needed - Astro automatically detects new content files.
+
+## RSS Feed
+
+All blog posts are automatically included in the RSS feed at `/rss.xml`. The feed includes:
+
+- Post title
+- Publication date
+- Excerpt
+- Link to full post
+
+See the [RSS Feeds guide](/guides/rss-feeds) for more details.
+
+## Related Resources
+
+- [Blog System Overview](/features/blog-system)
+- [Callout Component](/components/callout)
+- [Link Card Component](/components/link-card)
+- [MDX Documentation](https://mdxjs.com/)

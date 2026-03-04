@@ -1,0 +1,421 @@
+---
+title: "Blog System"
+description: "Complete guide to the blog system with MDX, components, and features"
+icon: "pen"
+---
+
+The blog system supports rich content authoring with MDX, custom components, syntax highlighting, search integration, and RSS feeds.
+
+## Blog Collection Schema
+
+The blog collection is defined in `src/content.config.ts:49`:
+
+```typescript
+const blog = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/blog" }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    excerpt: excerptSchema,
+    tags: tagsSchema,
+  }),
+});
+```
+
+### Frontmatter Fields
+
+<ParamField path="title" type="string" required>
+  The blog post title displayed in headers and meta tags
+</ParamField>
+
+<ParamField path="date" type="date" required>
+  Publication date (automatically coerced from YYYY-MM-DD format)
+</ParamField>
+
+<ParamField path="updatedDate" type="date">
+  Last updated date for showing "Updated on" information
+</ParamField>
+
+<ParamField path="excerpt" type="string" required>
+  Brief description used in post previews, RSS feeds, and meta descriptions
+</ParamField>
+
+<ParamField path="tags" type="string[]">
+  Array of tags for categorization and filtering
+</ParamField>
+
+## MDX Support
+
+Blog posts support both Markdown (`.md`) and MDX (`.mdx`) formats. MDX allows importing and using Astro components directly in your content.
+
+### Example Blog Post
+
+<CodeGroup>
+```mdx Frontmatter
+---
+title: "MDXブログ機能のデモ"
+date: 2026-01-11
+excerpt: "このブログで使える機能を紹介します。コードハイライト、コールアウト、テーブルなど。"
+tags: ["MDX", "Astro", "ブログ"]
+---
+```
+
+```mdx Component Imports
+import Callout from "../../components/blog/Callout.astro";
+import LinkCard from "../../components/blog/LinkCard.astro";
+import OgpCard from "../../components/blog/OgpCard.astro";
+```
+</CodeGroup>
+
+## Available MDX Components
+
+The following custom components are available for use in blog posts:
+
+### Callout Component
+
+Highlight important information with different severity levels:
+
+<Tabs>
+  <Tab title="Usage">
+    ```mdx
+    <Callout type="info">
+      これは情報を伝えるためのコールアウトです。補足説明などに使います。
+    </Callout>
+
+    <Callout type="tip" title="便利なTips">
+      便利なヒントや推奨事項を伝えるときに使います。
+    </Callout>
+
+    <Callout type="warning">
+      注意が必要な内容を伝えるときに使います。
+    </Callout>
+
+    <Callout type="danger" title="重要な警告">
+      絶対に避けるべきことや、危険な操作について警告するときに使います。
+    </Callout>
+    ```
+  </Tab>
+  <Tab title="Props">
+    <ParamField path="type" type="enum" required>
+      Callout type: `info`, `tip`, `warning`, or `danger`
+    </ParamField>
+    <ParamField path="title" type="string">
+      Optional custom title (defaults based on type)
+    </ParamField>
+  </Tab>
+</Tabs>
+
+### LinkCard Component
+
+Display beautiful link previews:
+
+```mdx
+<LinkCard
+  href="https://docs.astro.build/ja/guides/markdown-content/"
+  title="Astro Markdownガイド"
+  description="Astroでのマークダウンとコンテンツコレクションの使い方"
+/>
+```
+
+<ParamField path="href" type="string" required>
+  Target URL
+</ParamField>
+<ParamField path="title" type="string" required>
+  Link title
+</ParamField>
+<ParamField path="description" type="string" required>
+  Link description
+</ParamField>
+
+### OgpCard Component
+
+Automatically fetch and display OGP metadata:
+
+```mdx
+<OgpCard url="https://github.com/ta93abe/dbt-jobs" />
+```
+
+<ParamField path="url" type="string" required>
+  URL to fetch OGP metadata from
+</ParamField>
+
+## Markdown Features
+
+All standard Markdown and GitHub Flavored Markdown (GFM) features are supported:
+
+<Tabs>
+  <Tab title="Code Blocks">
+    Syntax highlighting powered by Shiki with automatic language detection:
+
+    ````mdx
+    ```typescript
+    interface User {
+      id: string;
+      name: string;
+      email: string;
+    }
+
+    async function getUser(id: string): Promise<User> {
+      const response = await fetch(`/api/users/${id}`);
+      return response.json();
+    }
+    ```
+    ````
+
+    Features:
+    - Syntax highlighting for 100+ languages
+    - Copy button for easy code copying
+    - Line numbers (configurable)
+  </Tab>
+  <Tab title="Tables">
+    ```markdown
+    | 機能 | 対応状況 | 備考 |
+    |------|:--------:|------|
+    | Markdown | ✅ | 基本的なMarkdown記法 |
+    | GFM | ✅ | テーブル、タスクリスト |
+    | MDX | ✅ | コンポーネント埋め込み |
+    ```
+  </Tab>
+  <Tab title="Task Lists">
+    ```markdown
+    - [x] MDX統合
+    - [x] Calloutコンポーネント
+    - [x] コードブロックのコピーボタン
+    - [ ] ダークモード対応（予定）
+    ```
+  </Tab>
+  <Tab title="Blockquotes">
+    ```markdown
+    > シンプルに書けて、美しく表示される。
+    > それがこのブログの目標です。
+    ```
+  </Tab>
+</Tabs>
+
+## Reading Time Calculation
+
+Reading time is automatically calculated for Japanese content using character count.
+
+### Implementation
+
+From `src/utils/reading-time.ts`:
+
+```typescript
+/**
+ * Calculate reading time for content
+ * @param content - The text content to analyze
+ * @param wordsPerMinute - Reading speed (default: 400 for Japanese)
+ * @returns Reading time in minutes
+ */
+export const getReadingTime = (
+  content: string,
+  wordsPerMinute = 400,
+): number => {
+  // For Japanese text, count characters instead of words
+  // Remove HTML tags, code blocks, and whitespace
+  const cleanContent = content
+    .replace(/<[^>]*>/g, "") // Remove HTML tags
+    .replace(/```[\s\S]*?```/g, "") // Remove code blocks
+    .replace(/`[^`]*`/g, "") // Remove inline code
+    .replace(/\s+/g, ""); // Remove whitespace
+
+  // Calculate based on character count for Japanese
+  const characters = cleanContent.length;
+  const minutes = Math.ceil(characters / wordsPerMinute);
+
+  return Math.max(1, minutes);
+};
+```
+
+<Note>
+  The function uses 400 characters per minute as the default reading speed, optimized for Japanese text.
+</Note>
+
+### Usage Example
+
+```typescript
+import { getReadingTime, formatReadingTime } from '@/utils/reading-time';
+
+const content = await entry.render();
+const readingTime = getReadingTime(content.body);
+const formatted = formatReadingTime(readingTime); // "約3分で読了"
+```
+
+## Tags and Filtering
+
+Blog posts can be tagged for categorization and filtering.
+
+### Adding Tags
+
+```mdx
+---
+title: "My Blog Post"
+date: 2026-01-11
+excerpt: "Post description"
+tags: ["TypeScript", "Astro", "Web Development"]
+---
+```
+
+### Querying by Tags
+
+```typescript
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog');
+const typescriptPosts = allPosts.filter(post => 
+  post.data.tags?.includes('TypeScript')
+);
+```
+
+## Pagefind Search Integration
+
+The site integrates Pagefind for fast, client-side search functionality.
+
+### Implementation
+
+From `src/pages/tools.astro:1064`:
+
+```javascript
+const { PagefindUI } = await import("/pagefind/pagefind-ui.js");
+const searchElement = document.getElementById("pagefind-search");
+
+if (searchElement) {
+  new PagefindUI({
+    element: searchElement,
+    showSubResults: true,
+  });
+}
+```
+
+### Search Metadata
+
+Pages include Pagefind metadata attributes:
+
+```html
+<article data-pagefind-body>
+  <h1 data-pagefind-meta="title">{title}</h1>
+  <p data-pagefind-meta="description">{excerpt}</p>
+  <span class="sr-only" data-pagefind-meta="category">Blog</span>
+  <!-- Content -->
+</article>
+```
+
+### Dependencies
+
+From `package.json`:
+
+```json
+{
+  "dependencies": {
+    "astro-pagefind": "^1.8.5"
+  },
+  "devDependencies": {
+    "pagefind": "^1.4.0"
+  }
+}
+```
+
+## RSS Feed Generation
+
+The blog generates an RSS feed at `/rss.xml` for feed readers.
+
+### RSS Endpoint
+
+From `src/pages/rss.xml.ts`:
+
+```typescript
+import { getCollection } from "astro:content";
+import rss from "@astrojs/rss";
+import type { APIContext } from "astro";
+
+export async function GET(context: APIContext) {
+  const blog = await getCollection("blog");
+  const sortedPosts = blog.sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+  );
+
+  return rss({
+    title: "ta93abe | Blog",
+    description: "技術ブログ。日々の学びや開発の記録を共有しています。",
+    site: context.site?.toString() ?? "http://localhost:4321",
+    items: sortedPosts.map((post) => ({
+      title: post.data.title,
+      pubDate: post.data.date,
+      description: post.data.excerpt,
+      link: `/blog/${post.id}/`,
+    })),
+    customData: "<language>ja</language>",
+  });
+}
+```
+
+### RSS Link in Header
+
+The blog index page includes an RSS feed link:
+
+```html
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title="ta93abe | Blog RSS Feed"
+  href="/rss.xml"
+/>
+```
+
+## Creating a New Blog Post
+
+<Steps>
+  <Step title="Create MDX file">
+    Create a new file in `src/content/blog/` with `.mdx` extension:
+    
+    ```bash
+    src/content/blog/my-new-post.mdx
+    ```
+  </Step>
+  
+  <Step title="Add frontmatter">
+    Include required fields at the top of the file:
+    
+    ```mdx
+    ---
+    title: "My New Blog Post"
+    date: 2026-03-04
+    excerpt: "A brief description of what this post covers"
+    tags: ["TypeScript", "Astro"]
+    ---
+    ```
+  </Step>
+  
+  <Step title="Import components (optional)">
+    Import any components you want to use:
+    
+    ```mdx
+    import Callout from "../../components/blog/Callout.astro";
+    import LinkCard from "../../components/blog/LinkCard.astro";
+    ```
+  </Step>
+  
+  <Step title="Write content">
+    Write your post using Markdown, MDX components, and code blocks.
+  </Step>
+  
+  <Step title="Build and preview">
+    The post will automatically appear on the blog index page, sorted by date.
+    
+    ```bash
+    npm run dev
+    ```
+  </Step>
+</Steps>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Content Collections" icon="folder" href="/features/content-collections">
+    Complete guide to all content collections
+  </Card>
+  <Card title="Components" icon="puzzle" href="/api-reference/components">
+    Available Astro components and their props
+  </Card>
+</CardGroup>

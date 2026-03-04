@@ -1,0 +1,401 @@
+---
+title: "Installation"
+description: "Detailed installation and setup guide for development"
+---
+
+This guide provides comprehensive instructions for setting up the ta93abe portfolio project for local development.
+
+## System Requirements
+
+Before you begin, ensure your system meets the following requirements:
+
+### Required Software
+
+- **Node.js**: Version 18.0.0 or higher
+  - Tested with v24.13.1
+  - Download from [nodejs.org](https://nodejs.org/)
+- **pnpm**: Package manager (recommended over npm/yarn)
+  - Version 8.0.0 or higher recommended
+- **Git**: For version control and cloning the repository
+
+### Optional Tools
+
+- **Visual Studio Code**: Recommended editor with extensions
+- **Modern browser**: Chrome, Firefox, Safari, or Edge for development
+
+<Warning>
+  While npm and yarn are supported, pnpm is the recommended package manager for this project. Using a different package manager may result in inconsistent dependency resolution.
+</Warning>
+
+## Package Manager Setup
+
+### Installing pnpm
+
+If you don't have pnpm installed, choose one of the following methods:
+
+<CodeGroup>
+```bash npm
+npm install -g pnpm
+```
+
+```bash Homebrew (macOS)
+brew install pnpm
+```
+
+```bash Standalone Script
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+```bash Windows PowerShell
+iwr https://get.pnpm.io/install.ps1 -useb | iex
+```
+</CodeGroup>
+
+Verify the installation:
+
+```bash
+pnpm --version
+```
+
+## Step-by-Step Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the repository to your local machine:
+
+    ```bash
+    git clone <repository-url>
+    cd me
+    ```
+
+    <Note>
+      The project directory is named `me` after the package name in package.json.
+    </Note>
+  </Step>
+
+  <Step title="Install dependencies">
+    Install all required project dependencies:
+
+    ```bash
+    pnpm install
+    ```
+
+    This will install:
+    - **Astro** (v5.17.2): The core framework
+    - **MDX Integration**: For rich content authoring
+    - **Tailwind CSS** (v4.1.18): For styling
+    - **TypeScript**: For type safety
+    - **Biome**: For linting and formatting
+    - **Vitest**: For unit testing
+    - **Playwright**: For E2E testing
+    - **Wrangler**: For Cloudflare deployment
+
+    And many other dependencies as defined in package.json.
+  </Step>
+
+  <Step title="Verify TypeScript configuration">
+    The project uses Astro's strict TypeScript configuration. Verify it's properly set up:
+
+    ```bash
+    pnpm astro check
+    ```
+
+    This command checks for TypeScript errors across your project.
+  </Step>
+
+  <Step title="Start the development server">
+    Launch the development server:
+
+    ```bash
+    pnpm dev
+    ```
+
+    You should see output similar to:
+
+    ```
+    🚀 astro v5.17.2 started in Xms
+
+    ┃ Local    http://localhost:4321/
+    ┃ Network  use --host to expose
+    ```
+  </Step>
+
+  <Step title="Verify the installation">
+    Open your browser and navigate to `http://localhost:4321`
+
+    You should see the portfolio homepage load successfully.
+  </Step>
+</Steps>
+
+## Environment Setup
+
+The ta93abe portfolio doesn't require environment variables for basic development, but you may want to configure the following:
+
+### Site Configuration
+
+The site URL is configured in `astro.config.mjs`:
+
+```javascript
+export default defineConfig({
+  site: "https://ta93abe.com",
+  // ... other config
+});
+```
+
+<Note>
+  The `site` configuration is used for generating sitemaps and RSS feeds. For local development, this doesn't need to be changed.
+</Note>
+
+### Deployment Configuration
+
+If you plan to deploy to Cloudflare Pages, you'll need to configure Wrangler separately. The project includes a `deploy` script:
+
+```bash
+pnpm deploy
+```
+
+This command builds the site and deploys it using Wrangler.
+
+## Development Tools Setup
+
+### Visual Studio Code
+
+The project includes recommended VS Code extensions in `.vscode/extensions.json`:
+
+```json
+{
+  "recommendations": [
+    "biomejs.biome",
+    "astro-build.astro-vscode",
+    "bradlc.vscode-tailwindcss"
+  ]
+}
+```
+
+<Steps>
+  <Step title="Install recommended extensions">
+    When you open the project in VS Code, you'll be prompted to install the recommended extensions. Click **Install All** to add:
+
+    - **Biome**: For code linting and formatting
+    - **Astro**: For `.astro` file syntax highlighting and IntelliSense
+    - **Tailwind CSS IntelliSense**: For Tailwind class autocomplete
+  </Step>
+
+  <Step title="Configure Biome as default formatter">
+    Add to your VS Code settings (`.vscode/settings.json`):
+
+    ```json
+    {
+      "editor.defaultFormatter": "biomejs.biome",
+      "editor.formatOnSave": true
+    }
+    ```
+  </Step>
+</Steps>
+
+### Code Quality Tools
+
+The project uses Biome for code quality:
+
+<CodeGroup>
+```bash Format Code
+pnpm format
+```
+
+```bash Lint Code
+pnpm lint
+```
+
+```bash Check and Fix
+pnpm assist
+```
+</CodeGroup>
+
+## Testing Setup
+
+The project includes both unit and E2E testing:
+
+### Unit Tests (Vitest)
+
+```bash
+# Run tests in watch mode
+pnpm test
+
+# Run tests with UI
+pnpm test:ui
+
+# Run tests once
+pnpm test:run
+
+# Generate coverage report
+pnpm test:coverage
+```
+
+### E2E Tests (Playwright)
+
+```bash
+# Run E2E tests
+pnpm test:e2e
+
+# Run E2E tests with UI
+pnpm test:e2e:ui
+
+# Show test report
+pnpm test:e2e:report
+```
+
+<Note>
+  Playwright may need to install browser binaries on first run. Follow the prompts to install them.
+</Note>
+
+## Verify Installation
+
+Run through this checklist to ensure everything is set up correctly:
+
+<Steps>
+  <Step title="Check Node.js version">
+    ```bash
+    node --version
+    ```
+    Should output v18.0.0 or higher.
+  </Step>
+
+  <Step title="Check pnpm version">
+    ```bash
+    pnpm --version
+    ```
+    Should output 8.0.0 or higher.
+  </Step>
+
+  <Step title="Verify dependencies">
+    ```bash
+    pnpm list --depth=0
+    ```
+    Should list all installed dependencies without errors.
+  </Step>
+
+  <Step title="Run TypeScript check">
+    ```bash
+    pnpm astro check
+    ```
+    Should complete without errors.
+  </Step>
+
+  <Step title="Build the project">
+    ```bash
+    pnpm build
+    ```
+    Should build successfully to `./dist/`
+  </Step>
+
+  <Step title="Preview the build">
+    ```bash
+    pnpm preview
+    ```
+    Should serve the production build at `http://localhost:4321`
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Common Installation Issues
+
+<AccordionGroup>
+  <Accordion title="pnpm install fails with EACCES error">
+    This usually indicates a permissions issue. Try:
+
+    ```bash
+    # Clear pnpm cache
+    pnpm store prune
+
+    # Retry installation
+    pnpm install
+    ```
+
+    Or check your Node.js installation permissions.
+  </Accordion>
+
+  <Accordion title="Port 4321 is already in use">
+    If another process is using port 4321, you can specify a different port:
+
+    ```bash
+    pnpm dev -- --port 3000
+    ```
+  </Accordion>
+
+  <Accordion title="TypeScript errors in .astro files">
+    Make sure you have the Astro VS Code extension installed:
+
+    ```bash
+    code --install-extension astro-build.astro-vscode
+    ```
+
+    Then reload VS Code.
+  </Accordion>
+
+  <Accordion title="Tailwind styles not applying">
+    The project uses Tailwind CSS v4 with the Vite plugin. If styles aren't working:
+
+    1. Verify `@tailwindcss/vite` is in your dependencies
+    2. Check that `tailwindcss()` is in the Vite plugins in `astro.config.mjs`
+    3. Restart the dev server
+
+    ```bash
+    # Stop the server (Ctrl+C) and restart
+    pnpm dev
+    ```
+  </Accordion>
+
+  <Accordion title="Build fails with 'Cannot find module' error">
+    Try clearing the Astro cache and node_modules:
+
+    ```bash
+    # Remove cache and dependencies
+    rm -rf node_modules .astro dist
+
+    # Reinstall
+    pnpm install
+
+    # Rebuild
+    pnpm build
+    ```
+  </Accordion>
+
+  <Accordion title="Sharp installation fails">
+    Sharp is used for image optimization. On some systems, it may fail to install. Try:
+
+    ```bash
+    # Clear pnpm cache
+    pnpm store prune
+
+    # Force reinstall sharp
+    pnpm add sharp --force
+    ```
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+  If you encounter issues with dependencies, avoid mixing package managers. Always use pnpm for this project to ensure consistent behavior.
+</Warning>
+
+## Next Steps
+
+Now that you have the project installed and running:
+
+<CardGroup cols={2}>
+  <Card title="Quickstart Guide" icon="rocket" href="/quickstart">
+    Follow the quickstart to create your first blog post
+  </Card>
+  
+  <Card title="Project Structure" icon="folder" href="/development/project-structure">
+    Learn about the project's architecture
+  </Card>
+  
+  <Card title="Content Collections" icon="book" href="/features/content-collections">
+    Understand how content is organized
+  </Card>
+  
+  <Card title="Configuration" icon="gear" href="/guides/site-configuration">
+    Customize the site configuration
+  </Card>
+</CardGroup>

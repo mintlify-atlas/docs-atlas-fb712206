@@ -1,0 +1,409 @@
+---
+title: SEO Optimization
+description: Optimize your ta93abe portfolio site for search engines
+---
+
+This guide covers the SEO features and optimization techniques used in the ta93abe portfolio project.
+
+## Meta Tags
+
+The site includes comprehensive meta tags configured in `src/layouts/Layout.astro`.
+
+### Primary Meta Tags
+
+```astro
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+<meta name="author" content={SITE.author} />
+<link rel="canonical" href={canonicalURL} />
+<meta name="generator" content={Astro.generator} />
+<meta name="color-scheme" content="light" />
+```
+
+### Canonical URLs
+
+Every page includes a canonical URL to prevent duplicate content issues:
+
+```astro
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+```
+
+```html
+<link rel="canonical" href={canonicalURL} />
+```
+
+### Setting Page Meta Tags
+
+Customize meta tags for each page by passing props to the Layout:
+
+```astro
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="Your Page Title"
+  description="Your page description for SEO"
+>
+  <!-- Page content -->
+</Layout>
+```
+
+## Open Graph Tags
+
+The site includes full Open Graph support for social media sharing.
+
+### OG Meta Tags
+
+```astro
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImageURL} />
+<meta property="og:image:alt" content={ogImageAlt} />
+<meta property="og:site_name" content={ogSiteName} />
+<meta property="og:locale" content={SITE.locale} />
+```
+
+### Twitter Card Tags
+
+```astro
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageURL} />
+<meta name="twitter:image:alt" content={ogImageAlt} />
+```
+
+### Customizing OG Images
+
+Set custom OG images per page:
+
+```astro
+<Layout
+  title="Your Page"
+  description="Page description"
+  ogImage="/custom-og-image.png"
+  ogImageAlt="Custom image description"
+  ogType="article"
+>
+  <!-- Content -->
+</Layout>
+```
+
+### Available OG Types
+
+- `website` (default) - For general pages
+- `article` - For blog posts
+- `book` - For book-like content
+
+## Structured Data (JSON-LD)
+
+The site uses JSON-LD structured data for better search engine understanding.
+
+### WebSite Schema
+
+Every page includes WebSite schema from `src/utils/schema.ts`:
+
+```typescript
+export const generateWebSiteSchema = (
+  siteUrl: string,
+  options: WebSiteSchemaOptions = {},
+): WebSiteSchema => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE.name,
+    url: siteUrl,
+    description: SITE.description,
+    author: {
+      "@type": "Person",
+      name: SITE.author,
+      url: siteUrl,
+    },
+    inLanguage: SITE.lang,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${siteUrl}tools?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+};
+```
+
+### BreadcrumbList Schema
+
+The schema utilities also support breadcrumb structured data:
+
+```typescript
+import { generateBreadcrumbSchema } from "../utils/schema";
+
+const breadcrumbSchema = generateBreadcrumbSchema(
+  [
+    { label: "Home", href: "/" },
+    { label: "Blog", href: "/blog" },
+    { label: "Current Post" },
+  ],
+  Astro.site?.href || SITE.url
+);
+```
+
+### Schema Safety
+
+Schemas are safely stringified to prevent script injection:
+
+```typescript
+export const stringifySchema = (schema: object): string => {
+  return JSON.stringify(schema).replace(/</g, "\\u003c");
+};
+```
+
+## Sitemap Generation
+
+The site automatically generates a sitemap at build time.
+
+### Configuration
+
+Sitemap is configured in `astro.config.mjs`:
+
+```javascript
+import sitemap from "@astrojs/sitemap";
+
+export default defineConfig({
+  site: "https://ta93abe.com",
+  integrations: [sitemap()],
+});
+```
+
+### Accessing the Sitemap
+
+After building, the sitemap is available at:
+```
+https://your-site.com/sitemap-index.xml
+```
+
+### Submitting to Search Engines
+
+Submit your sitemap to:
+- [Google Search Console](https://search.google.com/search-console)
+- [Bing Webmaster Tools](https://www.bing.com/webmasters)
+
+## RSS Feed
+
+The site includes an RSS feed for blog content at `src/pages/rss.xml.ts`.
+
+### RSS Implementation
+
+```typescript
+import { getCollection } from "astro:content";
+import rss from "@astrojs/rss";
+import type { APIContext } from "astro";
+
+export async function GET(context: APIContext) {
+  const blog = await getCollection("blog");
+  const sortedPosts = blog.sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+  );
+
+  return rss({
+    title: "ta93abe | Blog",
+    description: "技術ブログ。日々の学びや開発の記録を共有しています。",
+    site: context.site?.toString() ?? "http://localhost:4321",
+    items: sortedPosts.map((post) => ({
+      title: post.data.title,
+      pubDate: post.data.date,
+      description: post.data.excerpt,
+      link: `/blog/${post.id}/`,
+    })),
+    customData: "<language>ja</language>",
+  });
+}
+```
+
+### RSS Feed Location
+
+```
+https://your-site.com/rss.xml
+```
+
+### SEO Benefits
+
+- Enables content syndication
+- Helps search engines discover new content faster
+- Provides alternative content distribution channel
+
+## Performance Optimization
+
+Performance is a key SEO ranking factor. The site includes several optimizations.
+
+### HTML Compression
+
+```javascript
+export default defineConfig({
+  compressHTML: true,
+});
+```
+
+### CSS Optimization
+
+```javascript
+build: {
+  inlineStylesheets: "auto", // Inline critical CSS
+}
+
+vite: {
+  build: {
+    cssCodeSplit: true, // Split CSS for better caching
+  },
+}
+```
+
+### Link Prefetching
+
+Improve perceived performance with hover-based prefetching:
+
+```javascript
+prefetch: {
+  prefetchAll: false,
+  defaultStrategy: "hover",
+}
+```
+
+### Image Optimization
+
+Images include styling for better visual presentation:
+
+```css
+.prose img {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+```
+
+## Accessibility for SEO
+
+Accessibility improvements also benefit SEO.
+
+### Skip Links
+
+The layout includes skip links for keyboard navigation:
+
+```astro
+<a href="#main-content" class="skip-link">
+  コンテンツにスキップ
+</a>
+```
+
+### Semantic HTML
+
+Use proper heading hierarchy:
+- One `<h1>` per page
+- Logical heading structure (h2 → h3 → h4)
+- Semantic landmarks (`<header>`, `<main>`, `<footer>`)
+
+### Language Declaration
+
+```html
+<html lang="ja">
+```
+
+Updated from `src/config/site.ts`:
+
+```typescript
+export const SITE = {
+  lang: "ja", // Change to "en" for English
+  locale: "ja_JP", // Change to "en_US" for English
+};
+```
+
+## Search Functionality
+
+The site includes Pagefind for client-side search, which also helps with SEO.
+
+### Pagefind Integration
+
+```javascript
+import pagefind from "astro-pagefind";
+
+integrations: [pagefind()]
+```
+
+### Search Action Schema
+
+The WebSite schema includes SearchAction for Google search integration:
+
+```typescript
+potentialAction: {
+  "@type": "SearchAction",
+  target: {
+    "@type": "EntryPoint",
+    urlTemplate: `${siteUrl}tools?q={search_term_string}`,
+  },
+  "query-input": "required name=search_term_string",
+}
+```
+
+## Content Best Practices
+
+### Markdown Front Matter
+
+Always include descriptive front matter in content files:
+
+```yaml
+---
+title: "Descriptive, Keyword-Rich Title"
+date: 2024-03-15
+excerpt: "Clear, compelling description for search results"
+tags: ["relevant", "keywords"]
+---
+```
+
+### Heading Structure
+
+Use proper heading hierarchy:
+
+```markdown
+# Page Title (H1)
+
+## Main Section (H2)
+
+### Subsection (H3)
+
+#### Detail (H4)
+```
+
+### Internal Linking
+
+Link to related content to improve site structure and crawlability.
+
+## Monitoring SEO
+
+### Recommended Tools
+
+- **Google Search Console** - Monitor search performance
+- **Google Analytics** - Track user behavior
+- **Lighthouse** - Audit performance and SEO
+- **PageSpeed Insights** - Measure Core Web Vitals
+
+### Key Metrics
+
+- Core Web Vitals (LCP, FID, CLS)
+- Mobile usability
+- Page load time
+- Indexing status
+- Click-through rate (CTR)
+
+## Related Resources
+
+- [Site Configuration](/guides/site-configuration) - Configure site metadata
+- [Theming](/guides/theming) - Customize visual design
+- [Astro SEO Guide](https://docs.astro.build/en/guides/integrations-guide/sitemap/)
+- [Schema.org Documentation](https://schema.org/)

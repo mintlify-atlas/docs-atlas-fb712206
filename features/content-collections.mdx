@@ -1,0 +1,386 @@
+---
+title: "Content Collections"
+description: "Complete guide to all content collections in ta93abe portfolio"
+icon: "folder"
+---
+
+The ta93abe portfolio uses Astro's Content Collections API to manage all content types. This provides type-safe content with validation, automatic routing, and powerful querying capabilities.
+
+## Collection Overview
+
+The site defines 7 content collections in `src/content.config.ts`:
+
+<CardGroup cols={2}>
+  <Card title="blog" icon="pen" href="#blog-collection">
+    Personal blog posts with MDX support
+  </Card>
+  <Card title="works" icon="briefcase" href="#works-collection">
+    Portfolio project showcases
+  </Card>
+  <Card title="books" icon="book" href="#books-collection">
+    Reading list with ratings and status
+  </Card>
+  <Card title="talks" icon="microphone" href="#talks-collection">
+    Speaking engagements and presentations
+  </Card>
+  <Card title="zenn" icon="rss" href="#zenn-collection">
+    External articles from Zenn (RSS)
+  </Card>
+  <Card title="note" icon="rss" href="#note-collection">
+    External articles from Note (RSS)
+  </Card>
+  <Card title="podcast" icon="podcast" href="#podcast-collection">
+    Podcast episodes (RSS)
+  </Card>
+</CardGroup>
+
+## Common Schema Parts
+
+Shared schema definitions used across collections:
+
+```typescript
+// Tags schema - consistent across collections
+const tagsSchema = z.array(z.string()).optional();
+
+// Excerpt schema - short description
+const excerptSchema = z.string();
+```
+
+## Local Content Collections
+
+These collections use the `glob` loader to read files from the filesystem.
+
+### Blog Collection
+
+<ParamField path="loader" type="glob">
+  Pattern: `**/*.{md,mdx}` in `src/content/blog`
+</ParamField>
+
+**Schema:**
+
+```typescript
+const blog = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/blog" }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    excerpt: excerptSchema,
+    tags: tagsSchema,
+  }),
+});
+```
+
+<Tabs>
+  <Tab title="Field Types">
+    <ParamField path="title" type="string" required>
+      Blog post title
+    </ParamField>
+    <ParamField path="date" type="date" required>
+      Publication date (coerced from string)
+    </ParamField>
+    <ParamField path="updatedDate" type="date">
+      Last updated date (optional)
+    </ParamField>
+    <ParamField path="excerpt" type="string" required>
+      Short description for previews and SEO
+    </ParamField>
+    <ParamField path="tags" type="string[]">
+      Optional array of tags for categorization
+    </ParamField>
+  </Tab>
+  <Tab title="Example Frontmatter">
+    ```mdx
+    ---
+    title: "MDXブログ機能のデモ"
+    date: 2026-01-11
+    excerpt: "このブログで使える機能を紹介します。コードハイライト、コールアウト、テーブルなど。"
+    tags: ["MDX", "Astro", "ブログ"]
+    ---
+
+    import Callout from "../../components/blog/Callout.astro";
+    import LinkCard from "../../components/blog/LinkCard.astro";
+
+    このブログではMDXを使って、リッチなコンテンツを書くことができます。
+    ```
+  </Tab>
+</Tabs>
+
+### Works Collection
+
+<ParamField path="loader" type="glob">
+  Pattern: `**/*.{md,mdx}` in `src/content/works`
+</ParamField>
+
+**Schema:**
+
+```typescript
+const works = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/works" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      coverImage: image(),
+      tags: z.array(z.string()),
+      excerpt: excerptSchema,
+    }),
+});
+```
+
+<Tabs>
+  <Tab title="Field Types">
+    <ParamField path="title" type="string" required>
+      Project title
+    </ParamField>
+    <ParamField path="coverImage" type="image" required>
+      Cover image using Astro's image helper
+    </ParamField>
+    <ParamField path="tags" type="string[]" required>
+      Project technologies and categories
+    </ParamField>
+    <ParamField path="excerpt" type="string" required>
+      Short project description
+    </ParamField>
+  </Tab>
+  <Tab title="Example Frontmatter">
+    ```mdx
+    ---
+    title: "dbt-jobs"
+    coverImage: "../../../public/dbt-jobs.png"
+    tags: ["GitHub Actions", "dbt", "CI/CD", "Snowflake"]
+    excerpt: "dbt の CI/CD パイプラインを GitHub Actions で実行するための composite action。"
+    ---
+
+    import OgpCard from "../../components/blog/OgpCard.astro";
+
+    <OgpCard url="https://github.com/ta93abe/dbt-jobs" />
+    ```
+  </Tab>
+</Tabs>
+
+### Books Collection
+
+<ParamField path="loader" type="glob">
+  Pattern: `**/*.md` in `src/content/books`
+</ParamField>
+
+**Schema:**
+
+```typescript
+const books = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/books" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      author: z.string(),
+      coverImage: image(),
+      status: z.enum(["read", "reading", "stacked"]),
+      finishedDate: z.coerce.date().optional(),
+      rating: z.number().min(1).max(5).optional(),
+      category: z.string().optional(),
+      tags: z.array(z.string()),
+      excerpt: excerptSchema,
+    }),
+});
+```
+
+<Tabs>
+  <Tab title="Field Types">
+    <ParamField path="title" type="string" required>
+      Book title
+    </ParamField>
+    <ParamField path="author" type="string" required>
+      Book author
+    </ParamField>
+    <ParamField path="coverImage" type="image" required>
+      Book cover image
+    </ParamField>
+    <ParamField path="status" type="enum" required>
+      Reading status: `read`, `reading`, or `stacked`
+    </ParamField>
+    <ParamField path="finishedDate" type="date">
+      Date when finished reading (optional)
+    </ParamField>
+    <ParamField path="rating" type="number">
+      Rating from 1-5 stars (optional)
+    </ParamField>
+    <ParamField path="category" type="string">
+      Book category (optional)
+    </ParamField>
+    <ParamField path="tags" type="string[]" required>
+      Book topics and themes
+    </ParamField>
+    <ParamField path="excerpt" type="string" required>
+      Brief description or review
+    </ParamField>
+  </Tab>
+  <Tab title="Example Frontmatter">
+    ```markdown
+    ---
+    title: "サンプルブック"
+    author: "著者名"
+    coverImage: "../../../public/favicon.svg"
+    status: "read"
+    finishedDate: 2024-06-30
+    rating: 4
+    category: "技術"
+    tags: ["Astro", "Web", "設計"]
+    excerpt: "Astroを中心に、コンテンツ設計とページ構成を学ぶための入門書。"
+    ---
+
+    # サンプルブック
+
+    この本では、Astroの基本構成やコンテンツコレクションの活用方法を学びました。
+    ```
+  </Tab>
+</Tabs>
+
+### Talks Collection
+
+<ParamField path="loader" type="glob">
+  Pattern: `**/*.json` in `src/content/talks`
+</ParamField>
+
+**Schema:**
+
+```typescript
+const talks = defineCollection({
+  loader: glob({ pattern: "**/*.json", base: "./src/content/talks" }),
+  schema: z.object({
+    items: z.array(
+      z.object({
+        id: z.string(),
+        url: z.string().url().optional(),
+        date: z.coerce.date(),
+        title: z.string(),
+      }),
+    ),
+  }),
+});
+```
+
+<Tabs>
+  <Tab title="Field Types">
+    <ParamField path="items" type="array" required>
+      Array of talk objects
+    </ParamField>
+    <ParamField path="items[].id" type="string" required>
+      Unique identifier for the talk
+    </ParamField>
+    <ParamField path="items[].title" type="string" required>
+      Talk title
+    </ParamField>
+    <ParamField path="items[].date" type="date" required>
+      Presentation date
+    </ParamField>
+    <ParamField path="items[].url" type="string">
+      Link to slides or recording (optional)
+    </ParamField>
+  </Tab>
+  <Tab title="Example JSON">
+    ```json
+    {
+      "items": [
+        {
+          "id": "talk-1",
+          "title": "Astroで始めるモダンWeb開発",
+          "url": "https://example.com/talk-1",
+          "date": "2024-06-01"
+        },
+        {
+          "id": "talk-2",
+          "title": "TypeScriptのベストプラクティス",
+          "date": "2024-03-15"
+        }
+      ]
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  The talks collection uses a single JSON file with an array of items, rather than individual files per talk.
+</Note>
+
+## External Content Collections
+
+These collections use the custom RSS loader to fetch content from external sources.
+
+### External Article Schema
+
+All external collections share a common schema factory:
+
+```typescript
+const externalArticleSchema = (source: RSSSource) =>
+  z.object({
+    title: z.string(),
+    url: z.string().url(),
+    publishedAt: z.date(),
+    excerpt: z.string(),
+    source: z.literal(source),
+  });
+```
+
+### Zenn Collection
+
+```typescript
+const zenn = defineCollection({
+  loader: createRSSLoader("https://zenn.dev/ta93abe/feed", "Zenn", "zenn"),
+  schema: externalArticleSchema("Zenn"),
+});
+```
+
+### Note Collection
+
+```typescript
+const note = defineCollection({
+  loader: createRSSLoader("https://note.com/ta93abe/rss", "Note", "note"),
+  schema: externalArticleSchema("Note"),
+});
+```
+
+### Podcast Collection
+
+```typescript
+const podcast = defineCollection({
+  loader: createRSSLoader(
+    "https://anchor.fm/s/4dd661e8/podcast/rss",
+    "Podcast",
+    "podcast",
+  ),
+  schema: externalArticleSchema("Podcast"),
+});
+```
+
+<ParamField path="title" type="string">
+  Article or episode title from RSS feed
+</ParamField>
+<ParamField path="url" type="string">
+  Link to the external content
+</ParamField>
+<ParamField path="publishedAt" type="date">
+  Publication date from RSS feed
+</ParamField>
+<ParamField path="excerpt" type="string">
+  Content snippet or description
+</ParamField>
+<ParamField path="source" type="literal">
+  Source identifier: `"Zenn"`, `"Note"`, or `"Podcast"`
+</ParamField>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Blog System" icon="pen" href="/features/blog-system">
+    Deep dive into blog features and MDX components
+  </Card>
+  <Card title="External Content" icon="rss" href="/features/external-content">
+    How RSS loader fetches and processes external content
+  </Card>
+  <Card title="Portfolio Works" icon="briefcase" href="/features/portfolio-works">
+    Managing and displaying portfolio projects
+  </Card>
+  <Card title="Bookshelf" icon="book" href="/features/bookshelf">
+    Reading list management and display
+  </Card>
+</CardGroup>

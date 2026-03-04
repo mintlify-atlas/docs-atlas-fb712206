@@ -1,0 +1,283 @@
+---
+title: HeroSection
+description: Landing page hero section with call-to-action buttons
+---
+
+The HeroSection component is the main hero area displayed on the homepage, featuring a centered welcome message and call-to-action buttons.
+
+## Overview
+
+A full-viewport hero section with centered content, responsive typography, and action buttons. It serves as the main landing area for visitors.
+
+## Location
+
+```
+src/components/landing/HeroSection.astro
+```
+
+## Usage
+
+Import and use on the landing page:
+
+```astro
+---
+import HeroSection from "../components/landing/HeroSection.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="ta93abe | Software Engineer"
+  description="ソフトウェアエンジニア ta93abe のポートフォリオサイト。"
+>
+  <main>
+    <HeroSection />
+  </main>
+</Layout>
+```
+
+The HeroSection component doesn't accept any props - content is hardcoded within the component.
+
+## Structure
+
+The hero section consists of:
+1. **Greeting** - Welcome message in uppercase
+2. **Title** - Large name display (ta93abe)
+3. **Description** - Role/tagline subtitle
+4. **CTA Buttons** - Primary and secondary action buttons
+
+## Implementation
+
+```astro
+<section id="hero" class="hero-section">
+  <div class="hero-content">
+    <div class="hero-greeting">
+      <span>Welcome to my portfolio</span>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="hero-name">ta93abe</span>
+    </h1>
+
+    <p class="hero-description">
+      Software Engineer & Creative Developer
+    </p>
+
+    <div class="hero-cta">
+      <Button href="/works" variant="primary" size="lg">View Works</Button>
+      <Button href="/links" variant="secondary" size="lg">Links</Button>
+    </div>
+  </div>
+</section>
+```
+
+## Features
+
+### Full Viewport Height
+
+The hero takes up the full viewport height for maximum impact:
+
+```css
+.hero-section {
+  min-height: 100dvh; /* 100svh on mobile */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+```
+
+### Responsive Typography
+
+Text sizes scale smoothly using `clamp()`:
+
+```css
+.hero-title {
+  font-size: clamp(3rem, 10vw, 7rem);
+}
+
+.hero-description {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+}
+```
+
+### Call-to-Action Buttons
+
+Two buttons with different variants:
+- **Primary** - Solid background for main action (View Works)
+- **Secondary** - Outlined style for secondary action (Links)
+
+```astro
+<Button href="/works" variant="primary" size="lg">View Works</Button>
+<Button href="/links" variant="secondary" size="lg">Links</Button>
+```
+
+## Dependencies
+
+The HeroSection uses:
+- **Button.astro** - Reusable button component with variants
+
+## Styling
+
+The component uses scoped CSS with CSS custom properties:
+
+### CSS Variables Used
+- `--bg-primary` - Background color
+- `--text-primary` - Main text color
+- `--text-secondary` - Description text color
+- `--text-muted` - Greeting text color
+
+### Layout Classes
+```css
+.hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 2rem;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+```
+
+## Mobile Optimizations
+
+On mobile devices (max-width: 768px):
+- Uses `100svh` instead of `100dvh` for better mobile browser support
+- Buttons stack gracefully with `flex-wrap`
+- Responsive padding and font sizes
+
+```css
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 100svh;
+  }
+}
+```
+
+## Content Elements
+
+### Greeting
+Small uppercase text above the main title:
+```css
+.hero-greeting span {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+```
+
+### Title
+Large, bold name display with responsive sizing:
+```css
+.hero-title {
+  font-size: clamp(3rem, 10vw, 7rem);
+  font-weight: 700;
+  line-height: 1;
+}
+```
+
+### Description
+Role/tagline with medium sizing:
+```css
+.hero-description {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  color: var(--text-secondary);
+  margin: 1.5rem 0 2.5rem;
+}
+```
+
+## Customization
+
+### Changing Content
+
+Edit the component file directly to change text:
+
+```astro
+<div class="hero-greeting">
+  <span>Your custom greeting</span>
+</div>
+
+<h1 class="hero-title">
+  <span class="hero-name">Your Name</span>
+</h1>
+
+<p class="hero-description">
+  Your custom tagline
+</p>
+```
+
+### Adding More Buttons
+
+Extend the CTA section:
+
+```astro
+<div class="hero-cta">
+  <Button href="/works" variant="primary" size="lg">View Works</Button>
+  <Button href="/links" variant="secondary" size="lg">Links</Button>
+  <Button href="/contact" variant="ghost" size="lg">Contact</Button>
+</div>
+```
+
+### Using Props
+
+To make the component more flexible, you could add props:
+
+```astro
+---
+import Button from "../ui/Button.astro";
+
+interface Props {
+  greeting?: string;
+  name?: string;
+  description?: string;
+}
+
+const { 
+  greeting = "Welcome to my portfolio",
+  name = "ta93abe",
+  description = "Software Engineer & Creative Developer"
+} = Astro.props;
+---
+
+<section id="hero" class="hero-section">
+  <div class="hero-content">
+    <div class="hero-greeting">
+      <span>{greeting}</span>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="hero-name">{name}</span>
+    </h1>
+
+    <p class="hero-description">
+      {description}
+    </p>
+    
+    <!-- Rest of component -->
+  </div>
+</section>
+```
+
+## Integration
+
+The HeroSection is used on the homepage at `src/pages/index.astro`:
+
+```astro
+<Layout
+  title="ta93abe | Software Engineer"
+  description="ソフトウェアエンジニア ta93abe のポートフォリオサイト。"
+>
+  <main>
+    <HeroSection />
+  </main>
+</Layout>
+```
+
+Note the `overflow: hidden` style on the main element to prevent horizontal scrolling.
+
+## Related Components
+
+- [Button](/components/button) - CTA button component with multiple variants
