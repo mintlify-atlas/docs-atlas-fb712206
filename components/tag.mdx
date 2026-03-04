@@ -1,0 +1,121 @@
+---
+title: Tag
+description: Small label component for categorizing and organizing content with variant styles
+---
+
+The Tag component is a versatile label component used throughout the site for displaying tags, categories, and metadata. It provides multiple visual variants and is commonly used in blog posts, works listings, and content filtering.
+
+## Props
+
+<ParamField path="variant" type="string" default="default">
+  Visual variant of the tag. Available options:
+  - `default` - Neutral gray style
+  - `success` - Green style for positive states
+  - `warning` - Yellow style for warnings
+  - `info` - Blue style for informational tags
+</ParamField>
+
+<ParamField path="class" type="string">
+  Additional CSS classes to customize the tag appearance
+</ParamField>
+
+<ParamField path="children" type="ReactNode">
+  Tag content (text or other elements)
+</ParamField>
+
+## Variants
+
+### Default
+
+Neutral gray style for general purpose tags.
+
+```astro
+<Tag>JavaScript</Tag>
+<Tag>TypeScript</Tag>
+```
+
+### Success
+
+Green style for completed or positive states.
+
+```astro
+<Tag variant="success">Published</Tag>
+<Tag variant="success">Active</Tag>
+```
+
+### Warning
+
+Yellow style for warnings or attention items.
+
+```astro
+<Tag variant="warning">Draft</Tag>
+<Tag variant="warning">Pending</Tag>
+```
+
+### Info
+
+Blue style for informational tags.
+
+```astro
+<Tag variant="info">Featured</Tag>
+<Tag variant="info">New</Tag>
+```
+
+## Usage Examples
+
+### Blog Post Tags
+
+Tags are commonly used to categorize blog posts:
+
+```astro
+---
+import Tag from '../components/ui/Tag.astro';
+
+const tags = ['Astro', 'TypeScript', 'Web Development'];
+---
+
+<div class="flex flex-wrap gap-2">
+  {tags.map((tag) => (
+    <Tag>{tag}</Tag>
+  ))}
+</div>
+```
+
+### With Custom Styling
+
+Add additional classes for custom appearance:
+
+```astro
+<Tag class="font-bold uppercase">Important</Tag>
+<Tag variant="info" class="text-sm">Note</Tag>
+```
+
+### Content Filtering
+
+Tags can be used as filter chips:
+
+```astro
+<div class="flex gap-2">
+  <Tag variant="info">All</Tag>
+  <Tag>Frontend</Tag>
+  <Tag>Backend</Tag>
+  <Tag>DevOps</Tag>
+</div>
+```
+
+## Implementation
+
+The Tag component (src/components/ui/Tag.astro:1-26) uses Tailwind CSS classes for styling:
+
+- Rounded full borders (`rounded-full`)
+- Compact padding (`px-3 py-1`)
+- Small text size (`text-xs`)
+- Variant-based color schemes
+
+All variants include appropriate background and text colors for readability and visual hierarchy.
+
+## Related Components
+
+<Card title="Badge" icon="tag" href="/components/badge">
+  Status badges for book reading states
+</Card>

@@ -70,6 +70,7 @@
               "components/button",
               "components/card",
               "components/badge",
+              "components/tag",
               "components/input"
             ]
           },

@@ -40,7 +40,7 @@ interface Props {
 
 **Usage:**
 ```astro
-import Button from "@/components/ui/Button.astro";
+import Button from "../components/ui/Button.astro";
 
 <Button variant="primary" size="lg" href="/works">
   View Works
@@ -70,7 +70,7 @@ Container component for content cards.
 
 **Usage:**
 ```astro
-import Card from "@/components/ui/Card.astro";
+import Card from "../components/ui/Card.astro";
 
 <Card>
   <h3>Card Title</h3>
@@ -140,7 +140,7 @@ interface Props {
 
 **Usage:**
 ```astro
-import Callout from "@/components/blog/Callout.astro";
+import Callout from "../components/blog/Callout.astro";
 
 <Callout type="info" title="Note">
   This is an informational callout.
@@ -399,10 +399,10 @@ Components are composed to build complex UIs:
 
 ```astro
 ---
-import Layout from "@/layouts/Layout.astro";
-import HeroSection from "@/components/landing/HeroSection.astro";
-import Card from "@/components/ui/Card.astro";
-import Button from "@/components/ui/Button.astro";
+import Layout from "../layouts/Layout.astro";
+import HeroSection from "../components/landing/HeroSection.astro";
+import Card from "../components/ui/Card.astro";
+import Button from "../components/ui/Button.astro";
 ---
 
 <Layout title="Home">
